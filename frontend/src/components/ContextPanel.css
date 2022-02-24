@@ -1,0 +1,61 @@
+#twopanels{
+    padding-top:50px;
+    display: flex;
+    flex-direction: row;
+}
+
+#leftcolumn {
+    text-align: left;
+    padding-left:400px;
+    color: rgb(100,100,100);
+    font-size: medium;
+    width: 50%;
+}
+
+#headertext {
+    margin-bottom: 10px;
+}
+
+#rightcolumn {
+    padding-left: 0px;
+    color: rgb(100,100,100);
+    font-size: medium;
+    width: 50%;
+}
+
+#chartcolumn {
+    padding-left: 0px;
+    color: rgb(100,100,100);
+    font-size: medium;
+    width: 90%;
+}
+
+#rightcolumn {
+    padding-left: 0px;
+    color: rgb(100,100,100);
+    font-size: medium;
+    width: 10%;
+}
+
+.downloadbutton {
+    color: rgb(100,100,100);
+    margin-top: 10px;
+    margin-left: 40px;
+    margin-right: 20px;
+    pointer-events: all;
+}
+
+
+#download {
+    position: relative;
+    height: 50px;
+    width: 100px;
+    border-style: solid 1px rgb(50,50,50);
+    color: rgb(100,100,100);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: medium;
+    }
+
+#download:hover {
+    border-style: solid 2px #c03926;
+}

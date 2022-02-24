@@ -1,0 +1,12 @@
+
+web/__pycache__/*
+serve_app.bat
+web/config.py
+scripts/config.py
+scripts/__pycache__/*
+*pyc
+lib/config.py
+web/test_sa.py
+web/static/index.html
+notebooks/.ipynb_checkpoints/*
+notebooks/*.py
