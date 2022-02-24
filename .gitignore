@@ -12,6 +12,7 @@
 /frontend/build
 
 # misc
+/frontend/.env
 /frontend/.DS_Store
 /frontend/.env.local
 /frontend/.env.development.local
@@ -36,4 +37,3 @@ notebooks/.ipynb_checkpoints/*
 notebooks/*.py
 frontend/data/SOBEK_H_LOCATIONS.csv
 backend/scripts/*
-frontend/.env
