@@ -44,8 +44,8 @@ def _merge_rasters(indices, layer):
         rasterio.open(ahn_dir.joinpath(layer, f"{i.upper()}_CM.tif")) for i in indices
         ])
     profile["transform"] = affine
-    profile["width"] = raster_data.shape[1]
-    profile["height"] = raster_data.shape[2]
+    profile["width"] = raster_data.shape[2]
+    profile["height"] = raster_data.shape[1]
     tif_file = temp_dir / f"{str(uuid.uuid4())}.tif"
     with rasterio.open(tif_file, 'w', **profile) as dst:
         dst.write(raster_data[0], 1)
