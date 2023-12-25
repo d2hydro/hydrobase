@@ -49,7 +49,8 @@ def _merge_rasters(indices, layer):
     tif_file = temp_dir / f"{str(uuid.uuid4())}.tif"
     with rasterio.open(tif_file, 'w', **profile) as dst:
         dst.write(raster_data[0], 1)
-        
+        dst.scales = (0.01,)
+
     return tif_file
     
 
