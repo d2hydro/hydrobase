@@ -1,0 +1,7 @@
+name: hydrobas
+
+dependencies:
+  - fastapi
+  - jinja2
+  - uvicorn
+  - jupyterlab

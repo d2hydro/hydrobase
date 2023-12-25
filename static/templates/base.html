@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{ title }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="static/icons/favicon.ico" type="image/x-icon">
+
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="static/css/styles.css" rel="stylesheet">
+    <link href="../static/ol/ol.css" rel="stylesheet">
+
+    <!-- JS -->
+    <script src="../static/ol/dist/ol.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <div id="map-container">
+
+      <!-- map -->
+      <div id="map">
+        {% block map_content %}{% endblock %}
+      </div>
+  
+      <!--div id="info-container" class="info-container">
+        Hier<br>
+        komt<br>
+        heel<br>
+        veel<br>
+        informatie<br>
+        google-maps-stye!<br>
+      </div-->
+  
+      <!-- search -->
+      <!-- <input id="search-box" placeholder="Zoek in het netwerk"> -->
+      <!--div id="search-box" class="search-box">
+        {% block search_box_content %}{% endblock %}
+      </div-->
+  
+      <!-- layer selector -->
+      <div id="layer-selector">
+        {% block layer_selector_content %}{% endblock %}
+      </div>
+
+    </div>
+    </div>
+  </body>
+</html>

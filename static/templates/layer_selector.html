@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <div class="img-container" id="switchContainer">
+    <img id="switchImage" src="static/images/lufo.png" alt="Switch Button">
+    <span id="switchText">luchtfoto</span>
+  </div>
+
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+      let switchImage = document.getElementById('switchImage');
+      let switchText = document.getElementById('switchText');
+      switchImage.addEventListener('click', function() {
+        if (switchImage.getAttribute('src') === 'static/images/brt_water.png') {
+          switchImage.setAttribute('src', 'static/images/lufo.png');
+          map.getLayers().setAt(0, brtWaterLayer);
+          switchText.textContent = "Luchtfoto";
+          console.log("Switch is ON");
+        } else {
+          switchImage.setAttribute('src', 'static/images/brt_water.png');
+          map.getLayers().setAt(0, lufoLayer);
+          switchText.textContent = "Map";
+          console.log("Switch is OFF");
+        }
+      });
+    });
+  </script>
+</html>
