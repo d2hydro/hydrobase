@@ -13,9 +13,11 @@
 
     <!-- JS -->
     <script src="../static/ol/dist/ol.js"></script>
+    <script src="../static/hydrobase.js"></script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   </head>
   <body>
     <div id="map-container">
@@ -25,20 +27,13 @@
         {% block map_content %}{% endblock %}
       </div>
   
-      <!--div id="info-container" class="info-container">
-        Hier<br>
-        komt<br>
-        heel<br>
-        veel<br>
-        informatie<br>
-        google-maps-stye!<br>
-      </div-->
+      {% block info_container %}{% endblock %}
   
       <!-- search -->
-      <!-- <input id="search-box" placeholder="Zoek in het netwerk"> -->
-      <!--div id="search-box" class="search-box">
+      <!-- <input id="search-box" placeholder="Zoek in het netwerk">
+      <div id="search-box" class="search-box">
         {% block search_box_content %}{% endblock %}
-      </div-->
+      </div> -->
   
       <!-- layer selector -->
       <div id="layer-selector">

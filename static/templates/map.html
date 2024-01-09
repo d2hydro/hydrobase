@@ -49,7 +49,7 @@
     // Ribasim
     var RibasimSource = new ol.source.TileWMS({
         extend: [-2000.0, 290000.0, 294000.0, 630000.0],
-        url: "http://localhost:8080/geoserver/wms",
+        url: 'http://localhost:8080/geoserver/wms',
         params: {
           LAYERS: 'ribasim:Edge,ribasim:Node',
           TILED: "true"
@@ -67,6 +67,7 @@
     src: './static/icons/location_sign_red.svg',
     //size: 25
     scale: 0.05, // Adjust scale as necessary
+    anchor: [0.5, 1], // Align at bottom-center
   }),
 });
 
@@ -94,7 +95,7 @@ function styleFunction(feature) {
 }
     var geoJsonObj = {
     "type": "FeatureCollection",
-    "features": []
+    "features": [],
   };
     var searchSource = new ol.source.Vector({
     features: new ol.format.GeoJSON().readFeatures(geoJsonObj, {
@@ -110,7 +111,7 @@ function styleFunction(feature) {
     // Map definition
     var view = new ol.View({
       center: [155000, 463000],
-      zoom: 4.5,
+      zoom: 3.4,
       projection: projection
     });
     const zoomControl = new ol.control.Zoom({
@@ -126,12 +127,11 @@ function styleFunction(feature) {
     // Click-event
     map.on('singleclick', function (evt) {
     var viewResolution = map.getView().getResolution();
-    var viewProjection = map.getView().getProjection();
-    
+    var viewProjection = map.getView().getProjection();    
     // Replace with your Geoserver WMS service URL and layer names
     var wmsSource = new ol.source.TileWMS({
-        url: 'http://localhost:8080/geoserver/ows?',
-        params: {'LAYERS': 'hydamo:gemaal,hydamo:stuw', 'TILED': true},
+        url: './geoserver/ows?',
+        params: {'LAYERS': 'ribasim:Node', 'TILED': true},
         projection: viewProjection
     });
 
@@ -139,20 +139,27 @@ function styleFunction(feature) {
         evt.coordinate,
         viewResolution,
         viewProjection,
-        {'INFO_FORMAT': 'application/json', 'QUERY_LAYERS': 'hydamo:gemaal,hydamo:stuw'}
+        {'INFO_FORMAT': 'application/json', 'QUERY_LAYERS': 'ribasim:Node'}
     );
     
     if (url) {
         fetch(url)
             .then(function (response) { return response.json(); })
             .then(function (json) {
-                console.log(json); // Log the full response
+
+                // Add feature to searchSource
+                var geoJsonFormat = new ol.format.GeoJSON();
+                var newFeature = geoJsonFormat.readFeature(json.features[0], {
+                    featureProjection: 'EPSG:28992'
+                });
+                searchSource.clear();
+                searchSource.addFeature(newFeature);
+  
                 // Extract and log the globalid - replace 'globalid' with the actual key name for the globalid in your data
-                var globalId = json.features[0].properties.globalid
-                console.log(globalId); 
-                fetch(`./info?global_id=${encodeURIComponent(globalId)}`).then(response => response.json()).then(data => {
-                  console.log(data)
-                })
+                var nodeId = json.features[0].properties.node_id
+                var nodeType = json.features[0].properties.type
+                //toggleInfo()
+                openInfo(nodeId=nodeId, NodeType=nodeType)
             });
     }
 });

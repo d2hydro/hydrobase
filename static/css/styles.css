@@ -18,8 +18,22 @@
   min-width: 340px;
   max-width: 100%;
   width: 440px;
+  height: 100%;
   overflow-y: auto;
   z-index: 1000;
+  display: none;
+  padding: 10px;
+}
+
+#closeButton {
+  cursor: pointer;
+  color: #777;
+  float: right;
+  font-size: 25px;
+}
+
+#closeButton:hover {
+  color: blue;
 }
 
 /* SEARCH WIDGET */
