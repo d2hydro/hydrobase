@@ -46,19 +46,19 @@
         }
       })
     });
-    // Ribasim
-    var RibasimSource = new ol.source.TileWMS({
+    // Data layers
+    var DataSource = new ol.source.TileWMS({
         extend: [-2000.0, 290000.0, 294000.0, 630000.0],
-        url: 'http://localhost:8080/geoserver/wms',
+        url: 'https://www.hydrobase.nl/geoserver/geoserver/wms',
         params: {
-          LAYERS: 'ribasim:Edge,ribasim:Node',
+          LAYERS: "{{ data_layers }}",
           TILED: "true"
         },
         serverType: "geoserver"
       });
 
-    var RibasimLayer = new ol.layer.Tile({
-      source: RibasimSource
+    var DataLayer = new ol.layer.Tile({
+      source: DataSource
     });
 
     // Search layer
@@ -114,12 +114,26 @@ function styleFunction(feature) {
       zoom: 3.4,
       projection: projection
     });
+    
+    // Adjust zoom for mobile view
+    if (window.innerWidth <= 767) {
+
+      view.setZoom(2.5); // Adjust the initial zoom level for mobile
+      view.setCenter([145000, 350000]); // Set a new center for mobile
+    }
+
+    // Adjust zoom for mobile view
+    if (window.innerWidth <= 400) {
+      view.setZoom(2.5); // Adjust the initial zoom level for mobile
+      view.setCenter([145000, 410000]); // Set a new center for mobile
+    }
+
     const zoomControl = new ol.control.Zoom({
       className: 'custom-zoom'
     });
     var map = new ol.Map({
       controls: [zoomControl],
-      layers: [brtWaterLayer, RibasimLayer, searchLayer],
+      layers: [brtWaterLayer, DataLayer, searchLayer],
       target: 'map',
       view: view
     });
@@ -128,18 +142,12 @@ function styleFunction(feature) {
     map.on('singleclick', function (evt) {
     var viewResolution = map.getView().getResolution();
     var viewProjection = map.getView().getProjection();    
-    // Replace with your Geoserver WMS service URL and layer names
-    var wmsSource = new ol.source.TileWMS({
-        url: './geoserver/ows?',
-        params: {'LAYERS': 'ribasim:Node', 'TILED': true},
-        projection: viewProjection
-    });
-
-    var url = wmsSource.getFeatureInfoUrl(
+    
+    var url = DataSource.getFeatureInfoUrl(
         evt.coordinate,
         viewResolution,
         viewProjection,
-        {'INFO_FORMAT': 'application/json', 'QUERY_LAYERS': 'ribasim:Node'}
+        {'INFO_FORMAT': 'application/json', 'QUERY_LAYERS': '{{ query_layers }}'}
     );
     
     if (url) {
@@ -156,10 +164,9 @@ function styleFunction(feature) {
                 searchSource.addFeature(newFeature);
   
                 // Extract and log the globalid - replace 'globalid' with the actual key name for the globalid in your data
-                var nodeId = json.features[0].properties.node_id
-                var nodeType = json.features[0].properties.type
+                var Id = json.features[0].id
                 //toggleInfo()
-                openInfo(nodeId=nodeId, NodeType=nodeType)
+                openInfo(Id=Id)
             });
     }
 });

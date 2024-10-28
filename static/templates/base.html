@@ -3,7 +3,9 @@
   <head>
     <title>{{ title }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="static/icons/favicon.ico" type="image/x-icon">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="icon" href="{{icon_url}}" type="image/x-icon">
+    <link rel="manifest" href="./ribasim/manifest">
 
     <!-- CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -21,26 +23,43 @@
   </head>
   <body>
     <div id="map-container">
-
+     
       <!-- map -->
       <div id="map">
         {% block map_content %}{% endblock %}
       </div>
-  
+    
       {% block info_container %}{% endblock %}
-  
+    
       <!-- search -->
-      <!-- <input id="search-box" placeholder="Zoek in het netwerk">
+      <form id="search-form">
+        <input type="text" id="search-input" placeholder="Zoek in het netwerk">
+        <button type="button" class="search-button" title="Zoeken" id="search-button">
+          <img src="static/icons/search.png" alt="Search" class="custom-icon">
+        </button>
+        <button id="closeButton" title="Close">
+          <img src="static/icons/Close.png" alt="Close" class="custom-icon">
+        </button>
+      </form>
+    
+      <input id="search-box" placeholder="Zoek in het netwerk">
       <div id="search-box" class="search-box">
         {% block search_box_content %}{% endblock %}
-      </div> -->
-  
+      </div> 
+      
       <!-- layer selector -->
       <div id="layer-selector">
         {% block layer_selector_content %}{% endblock %}
       </div>
-
+    
     </div>
-    </div>
-  </body>
-</html>
+    
+    <script>
+      // Initial check on orientation
+      updateOrientation();
+      
+      // Event listener to detect rotation (orientationchange)
+      window.addEventListener('orientationchange', updateOrientation);
+    </script>
+    </body>
+    </html>

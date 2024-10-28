@@ -1,7 +1,14 @@
-name: hydrobas
+name: hydrobase
+
+channels:
+  - conda-forge
 
 dependencies:
   - fastapi
   - jinja2
   - uvicorn
   - jupyterlab
+  - httpx
+  - geopandas
+  - pyogrio
+  - ribasim=2023.4.0
