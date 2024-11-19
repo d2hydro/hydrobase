@@ -13,7 +13,7 @@ import shapely
 from jinja2 import Environment, FileSystemLoader
 from pathlib import Path
 import httpx
-from ribasim_nl import Model
+from ribasim import Model
 from shapely.geometry import Point
 import json
 import pandas as pd
