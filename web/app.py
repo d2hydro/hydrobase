@@ -290,7 +290,7 @@ async def info(node_id=int):
             node_id=node_id,
             node_type=node_table.at[node_id, "node_type"],
             node_name=node_table.at[node_id, "name"],
-            photo_url=f"http://127.0.0.1:3000/static/icons/{app_layers.get_icon(layer)}",
+            photo_url=f"{APP_URL}/static/icons/{app_layers.get_icon(layer)}",
         )
 
         # basins and rating curves are always graph-types
