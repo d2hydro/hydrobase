@@ -7,24 +7,81 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+import shapely
 
 # from .utils import get_logger
 from jinja2 import Environment, FileSystemLoader
 from pathlib import Path
 import httpx
-import ribasim
+from ribasim_nl import Model
+from shapely.geometry import Point
+import json
+import pandas as pd
 
-# from .config import STATIC_DIR
+try:
+    from .config import DATA_DIR
+    from .utils import layers_for_geoserver
+    from .case_conversions import pascal_to_snake_case
+except ImportError:
+    from config import DATA_DIR
+    from utils import layers_for_geoserver
+    from case_conversions import pascal_to_snake_case
 
-STATIC_DIR = Path(r"d:\repositories\hydrobase\static")
+
+PARAMETER_MAP = {
+    "drainage": {"unit": "m/s", "name": "Drainage"},
+    "flow_rate": {"unit": "m3/s", "name": "Debiet"},
+    "infiltration": {"unit": "m/s", "name": "Infiltratie"},
+    "level": {"unit": "m[NAP]", "name": "Waterhoogte"},
+    "max_flow_rate": {"unit": "m3/s", "name": "Maximaal debiet"},
+    "max_downstream_level": {"unit": "m3/s", "name": "Waterhoogte beneden"},
+    "min_flow_rate": {"unit": "m3/s", "name": "Minimaal debiet"},
+    "min_upstream_level": {"unit": "m3/s", "name": "Waterhoogte boven"},
+    "potential_evaporation": {"unit": "m/s", "name": "Verdamping"},
+    "precipitation": {"unit": "m/s", "name": "Neerslag"},
+}
+
+STATIC_DIR = Path(__file__).parents[1] / "static"
 APP_DATA_DIR = STATIC_DIR.joinpath("data")
 TEMPLATES_DIR = STATIC_DIR.joinpath("templates")
-GEOSERVER_URL = "https://www.hydrobase.nl/geoserver/geoserver"
 BASE_ICON_URL = "static/icons/{icon_name}.ico"
-DATA_DIR = Path(r"d:\data")
 env = Environment(loader=FileSystemLoader(TEMPLATES_DIR))
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
+# %%Plotly playground
+import plotly.graph_objects as go
+import numpy as np
+
+np.random.seed(1)
+
+N = 100
+x = np.random.rand(N)
+y = np.random.rand(N)
+colors = np.random.rand(N)
+sz = np.random.rand(N) * 30
+
+fig = go.Figure()
+fig.add_trace(
+    go.Scatter(
+        x=x,
+        y=y,
+        mode="markers",
+        marker=go.scatter.Marker(
+            size=sz, color=colors, opacity=0.6, colorscale="Viridis"
+        ),
+    )
+)
+
+graph1Plot = fig.to_html(
+    full_html=False,
+    include_plotlyjs=False,
+    div_id="plotlyGraph1",
+    default_width="100px",
+    default_height="100px",
+)
+
+
+# %%
 # data
 structures_gdf = gpd.read_file(
     DATA_DIR.joinpath("hydamo", "hydamo.gpkg"),
@@ -32,8 +89,103 @@ structures_gdf = gpd.read_file(
     engine="pyogrio",
     fid_as_index=True,
 )
-model = ribasim.Model.read(DATA_DIR.joinpath("lhm", "lhm.toml"))
 
+ribasim_toml = DATA_DIR.joinpath("lhm", "lhm.toml")
+model = Model.read(ribasim_toml)
+
+node_table = model.node_table().df
+layers_gpkg = layers_for_geoserver(model)
+
+
+class Layers:
+    water_basin_area = gpd.read_file(layers_gpkg, layer="WaterBasinArea").set_index(
+        "node_id"
+    )
+    water_pump = gpd.read_file(layers_gpkg, layer="WaterPump").set_index("node_id")
+    water_outlet = gpd.read_file(layers_gpkg, layer="WaterOutlet").set_index("node_id")
+    water_tabulated_rating_curve = gpd.read_file(
+        layers_gpkg, layer="WaterTabulatedRatingCurve"
+    ).set_index("node_id")
+    storage_basin_area = gpd.read_file(layers_gpkg, layer="StorageBasinArea").set_index(
+        "node_id"
+    )
+
+    _node_layers = ["water_pump", "water_tabulated_rating_curve", "water_outlet"]
+    _area_layers = ["water_basin_area", "storage_basin_area"]
+
+    def get_layer(self, node_id: int):
+        layers = (
+            "water_pump",
+            "water_outlet",
+            "water_tabulated_rating_curve",
+            "water_basin_area",
+            "storage_basin_area",
+        )
+        return next(
+            (layer for layer in layers if node_id in getattr(self, layer).index)
+        )
+
+    def get_icon(self, layer: str):
+        if layer == "water_basin_area":
+            return "watervlak.svg"
+        elif layer == "storage_basin_area":
+            return "gebied.svg"
+        elif layer == "water_pump":
+            return "gemaal.svg"
+        elif layer == "water_outlet":
+            return "constant.svg"
+        elif layer == "water_tabulated_rating_curve":
+            return "qh.svg"
+
+    def _strip_layer_name(self, layer):
+        return pascal_to_snake_case(layer.split(":")[1])
+
+    def get_feature_by_point(self, point, tolerance, layers=[]):
+        # construct node and area_df
+        layers = [self._strip_layer_name(i) for i in layers]
+        node_layers = [getattr(self, i) for i in layers if i in self._node_layers]
+        if node_layers:
+            node_df = pd.concat(node_layers)
+
+        area_layers = [getattr(self, i) for i in layers if i in self._area_layers]
+        if area_layers:
+            area_df = pd.concat(area_layers)
+
+        # if node_layers we see if we can find a node in tolerance
+        if len(node_layers) > 0:
+            node_distance = node_df.distance(point).sort_values()
+            if (
+                node_distance < tolerance
+            ).any():  # if node within tolerance we return node
+                node_id = node_distance.idxmin()
+                return node_df.loc[[node_id]].reset_index()
+
+        # if area_layers and we still haven't returned we see if point is contained by area
+        if len(area_layers) > 0:
+            area_df = area_df[area_df.contains(point)]
+            if area_df.empty:
+                return None
+            else:
+                if len(area_df) == 1:
+                    node_id = area_df.index[0]
+                else:
+                    area_df.loc[:, ["area"]] = area_df.geometry.area
+                    node_id = area_df["area"].sort_values().idxmin()
+
+                df = pd.concat(
+                    [
+                        area_df.loc[[node_id]].reset_index(),
+                        model.basin.node.df.loc[[node_id]].reset_index(),
+                    ],
+                    ignore_index=True,
+                )
+                df.loc[:, ["node_type"]] = "Basin"
+                return df
+        else:
+            return None
+
+
+app_layers = Layers()
 
 tags_metadata = [
     {
@@ -65,7 +217,17 @@ app = FastAPI(
     openapi_tags=tags_metadata,
 )
 
-origins = ["http://localhost:3000"]
+origins = ["http://localhost:3000", "http://localhost:6001", "https://www.hydrobase.nl"]
+
+origins = ["*"]
+
+
+def static_to_dict(df):
+    return [
+        [PARAMETER_MAP[k]["name"], v, PARAMETER_MAP[k]["unit"]]
+        for k, v in df.dropna().to_dict().items()
+    ]
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -91,8 +253,8 @@ async def ribasim_home():
     """Fetch the Ribasim home."""
     template = env.get_template("index.html")
     icon_url = BASE_ICON_URL.format(icon_name="ribasim")
-    data_layers = "ribasim:BasinArea,ribasim:Edge,ribasim:Node"
-    query_layers = "ribasim:Node"
+    data_layers = "ribasim:StorageBasinArea,ribasim:WaterBasinArea,ribasim:WaterEdge,ribasim:WaterPump,ribasim:WaterOutlet,ribasim:WaterTabulatedRatingCurve"
+    query_layers = "ribasim:WaterBasinArea"
     html_content = template.render(
         title="Ribasim-NL",
         icon_url=icon_url,
@@ -123,47 +285,162 @@ async def get_manifest():
     return manifest
 
 
-@app.get("/info", include_in_schema=False, tags=["Ribasim"])
-async def info(layer: str, fid: int):
+@app.get("/node", include_in_schema=False, tags=["Ribasim"])
+async def node(x: float, y: float, tolerance: float, layers: str):
     """
-    - **layer**: Hydrobase layer (str)
-    - **fid: feature id witin layer (int)
+    - **x**: x-coordinate
+    - **y**: y-coordinate
+    - **tolerance**: tolerance around point for searching objects
+    - **layers**: layers as a filter
+    """
+    print(layers)
+    point = Point(x, y)
+    feature = app_layers.get_feature_by_point(
+        point, tolerance, layers=layers.split(",")
+    )
+    if feature is None:
+        return None
+    else:
+        feature.loc[:, ["geometry"]] = gpd.GeoSeries(
+            shapely.set_precision(shapely.force_2d(feature.geometry.array), grid_size=1)
+        )
+        return json.loads(feature.to_json())
+
+
+@app.get("/info", include_in_schema=False, tags=["Ribasim"])
+async def info(node_id=int):
+    """
+    - **x**: x-coordinate
+    - **y**: y-coordinate
+    - **tolerance**: tolerance around point for searching objects
     """
 
-    photo_url = "https://www.hydrobase.nl/static/icons/photo_placeholder.png"
-    if layer == "Node":
-        node = model.network.node.df.loc[fid]
-        if node["node_type"] == "Basin":
-            template = env.get_template("basin.html")
-            html_content = template.render(photo_url=photo_url, node_id=fid)
-        else:
-            html_content = "<br> <br> <br> <br> template for node not yet implemented"
-    elif layer == "kunstwerk":
-        structure = structures_gdf.loc[fid]
-        template = env.get_template("structure.html")
-        html_content = template.render(
-            name=structure.naam,
-            photo_url=structure.photo_url,
-            code=structure.code,
-            complex=structure.complex_naam,
-            type=structure.kw_soort,
-            source=structure.bron,
+    node_id = int(node_id)
+    if node_id is not None:
+        layer = app_layers.get_layer(node_id)
+
+        kwargs = dict(
+            node_id=node_id,
+            node_type=node_table.at[node_id, "node_type"],
+            node_name=node_table.at[node_id, "name"],
+            photo_url=f"http://127.0.0.1:3000/static/icons/{app_layers.get_icon(layer)}",
         )
 
-    return HTMLResponse(content=html_content, status_code=200)
+        # basins and rating curves are always graph-types
+        if layer in [
+            "water_basin_area",
+            "storage_basin_area",
+            "water_tabulated_rating_curve",
+        ]:
+            template = env.get_template("info_graph.html")
+
+        # pumps and outlets can be graphs can be constant
+        elif layer in ["water_pump", "water_outlet"]:
+            flow_rate = (
+                getattr(model, layer.split("_")[1])
+                .static.df.set_index("node_id")
+                .at[node_id, "flow_rate"]
+            )
+            if isinstance(flow_rate, pd.Series):
+                template = env.get_template("info_graph.html")
+            else:
+                template = env.get_template("constant_rate.html")
+                kwargs["flow_rate"] = flow_rate
+        else:
+            template = env.get_template("info_base.html")
+
+        html_content = template.render(**kwargs)
+
+        return HTMLResponse(content=html_content, status_code=200)
+    else:
+        return None
 
 
-@app.get("/basin", tags=["Ribasim"])
-async def node(node_id: int) -> dict:
+@app.get("/graph_data", tags=["Ribasim"])
+async def graph_data(node_id: int):
+    node_type = node_table.at[node_id, "node_type"]
+    if node_type == "Basin":
+        # select data
+        profile_df = model.basin.profile.df[
+            model.basin.profile.df["node_id"] == node_id
+        ][["area", "level"]]
+
+        graph_data = dict(
+            title="A(h) profiel",
+            x_axis_title="hoogte [m NAP]",
+            y_axis_title="oppervlak [m2]",
+            x=profile_df["level"].to_list(),
+            y=profile_df["area"].to_list(),
+        )
+
+        return graph_data
+
+    elif node_type == "TabulatedRatingCurve":
+        curve_df = model.tabulated_rating_curve.static.df[
+            model.tabulated_rating_curve.static.df["node_id"] == node_id
+        ][["flow_rate", "level"]]
+
+        graph_data = dict(
+            title="Q(h) profiel",
+            x_axis_title="hoogte [m NAP]",
+            y_axis_title="debiet [m3/s]",
+            x=curve_df["level"].to_list(),
+            y=curve_df["flow_rate"].to_list(),
+        )
+
+        return graph_data
+
+
+@app.get("/static_data", tags=["Ribasim"])
+async def static_data(node_id: int):
+    node_type = node_table.at[node_id, "node_type"]
+    df = getattr(model, pascal_to_snake_case(node_type)).static.df
+    df = df.set_index("node_id").loc[node_id]
+    if isinstance(df, pd.Series):
+        result = static_to_dict(df)
+        if len(result) > 0:
+            return result
+        else:
+            return None
+    else:
+        return None
+
+
+@app.get("/outlet/control", tags=["Ribasim"])
+async def outlet(node_id: int) -> dict:
     """
     - **node_id**: Ribasim node_id
     """
-    profile = {
-        "profile": model.basin.profile.df[model.basin.profile.df["node_id"] == node_id][
-            ["area", "level"]
-        ].to_dict("list")
-    }
-    return profile
+
+    # get table
+    static_df = model.outlet.static.df[model.outlet.static.df["node_id"] == node_id]
+
+    # check if outlet has control
+    if len(static_df) > 1:
+        # get controller
+        mask = (model.edge.df.to_node_id == node_id) & (
+            model.edge.df.edge_type == "control"
+        )
+        control_node_id = model.edge.df[mask].iloc[0].from_node_id
+        control_name = model.discrete_control.node.df.at[control_node_id, "name"]
+
+        condition_df = model.discrete_control.condition.df[
+            model.discrete_control.condition.df["node_id"] == control_node_id
+        ]
+
+        control_df = pd.concat(
+            [
+                condition_df.set_index("meta_control_state"),
+                static_df.set_index("control_state"),
+            ],
+            axis=1,
+        )
+        control_df = control_df[["greater_than", "flow_rate"]].rename(
+            columns={"greater_than": "control_state"}
+        )
+
+        static = {"control": control_df[["flow_rate", "control_state"]].to_dict("list")}
+        return static
 
 
 @app.get(
@@ -203,4 +480,6 @@ async def proxy_geoserver(path: str, request: Request):
             )
 
 
-# %%
+# point = Point(149406.21322412725, 399578.2228710489)
+# tolerance = 1
+# layers = ["water_basin_area", "storage_basin_area"]

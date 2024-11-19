@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
+  <!-- Diamond shape -->
+  <polygon points="14,0 28,14 14,28 0,14" 
+           fill="#008000" 
+           stroke="#969696" 
+           stroke-width="0.5"/>
+</svg>

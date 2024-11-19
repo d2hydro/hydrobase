@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <div id="sidebar" class="sidebar">
+      <button id="sidebar-close-button" class="custom-button" title="Close">
+        <img src="static/icons/close.svg" alt="Close" class="custom-icon">
+      </button>
+      <img src="static/icons/layer_selector.svg" width=60, height=60>
+      <hr>
+      <div id="layer-controls">
+        <ul id="layer-list"></ul>
+      </div>
+      <hr>
+      <div id="background-control" class="toggle-row">
+        <label class="background-switch">
+          <input type="checkbox">
+          <span class="slider round"></span>
+        </label>
+        <span class="toggle-label">luchtfoto</span>
+      </div>
+      <hr>
+    </div>
+
+
+
+    <script type="text/javascript">
+    // Get elements
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const toggleButton = document.getElementById('layers-toggle-button');
+    const closeButton = document.getElementById('sidebar-close-button');
+    
+    // Show sidebar and overlay
+    toggleButton.addEventListener('click', () => {
+      const isVisible = sidebar.classList.contains('visible');
+
+      if (isVisible) {
+        sidebar.classList.remove('visible');
+      } else {
+      sidebar.classList.add('visible');
+    }
+  });
+    
+    // Close sidebar and overlay
+    const closeSidebar = () => {
+      sidebar.classList.remove('visible');
+      document.body.style.overflow = ''; // Enable background scrolling
+    };
+    
+    closeButton.addEventListener('click', closeSidebar);
+  
+// Populate the list with toggle switches, icons, and custom labels in reverse order
+const layerList = document.getElementById("layer-list");
+
+for (let i = layerInfo.length - 1; i >= 0; i--) {
+  const [layerName, iconFilename, customLabel] = layerInfo[i];
+  const { layer } = openLayers.find((l) => l.name === layerName);
+
+  // Create list item for the layer
+  const listItem = document.createElement("li");
+  listItem.className = "layer-item";
+
+  // Create the checkbox input
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.checked = true;
+  checkbox.id = layerName;
+  checkbox.addEventListener('change', () => {
+    layer.setVisible(checkbox.checked);
+  });
+
+  // Create the icon image
+  const icon = document.createElement("img");
+  icon.src = `static/icons/${iconFilename}`;
+  icon.alt = customLabel;
+  icon.className = "layer-icon";
+
+  // Create the label for the checkbox
+  const label = document.createElement("label");
+  label.htmlFor = layerName;
+  label.innerText = customLabel;
+  label.className = "layer-label"
+
+  // Append checkbox, icon, and label to the list item
+  listItem.appendChild(checkbox);
+  listItem.appendChild(icon);
+  listItem.appendChild(label);
+
+  // Add list item to the layer list
+  layerList.appendChild(listItem);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Get the checkbox input element
+    let backgroundSwitch = document.querySelector('.background-switch input');
+
+    backgroundSwitch.addEventListener('change', function() {
+      if (backgroundSwitch.checked) {
+        // When the checkbox is checked, switch to the lufoLayer
+        map.getLayers().setAt(0, lufoLayer);
+        console.log("Switch is ON");
+      } else {
+        // When the checkbox is unchecked, switch to the brtWaterLayer
+        map.getLayers().setAt(0, brtWaterLayer);
+           console.log("Switch is OFF");
+      }
+    });
+  });
+
+
+</script>
+
+  </body>
+</html>

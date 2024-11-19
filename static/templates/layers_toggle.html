@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <div class="img-container" id="switchContainer">
+    <img id="switchImage" src="static/icons/layer_selector.svg" alt="Switch Button">
+    <!-- <span id="switchText">luchtfoto</span> -->
+  </div>
+
+  <script type="text/javascript">
+    switchImage.addEventListener('click', function() {
+      var infoContainer = document.getElementById("info-container");
+    // make info visible
+    infoContainer.style.display = 'block';
+
+    // set layer-selector position
+    var currentWidth = infoContainer.offsetWidth;
+    var layerSelector = document.getElementById("layer-selector");
+    layerSelector.style.left = (currentWidth + 20) + 'px';
+
+    });
+  </script>
+</html>

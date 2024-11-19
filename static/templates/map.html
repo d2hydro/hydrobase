@@ -46,28 +46,25 @@
         }
       })
     });
-    // Data layers
-    var DataSource = new ol.source.TileWMS({
-        extend: [-2000.0, 290000.0, 294000.0, 630000.0],
-        url: 'https://www.hydrobase.nl/geoserver/geoserver/wms',
-        params: {
-          LAYERS: "{{ data_layers }}",
-          TILED: "true"
-        },
-        serverType: "geoserver"
-      });
-
-    var DataLayer = new ol.layer.Tile({
-      source: DataSource
-    });
 
     // Search layer
-    const iconStyle = new ol.style.Style({
+const pointIconStyle = new ol.style.Style({
   image: new ol.style.Icon({
     src: './static/icons/location_sign_red.svg',
     //size: 25
     scale: 0.05, // Adjust scale as necessary
     anchor: [0.5, 1], // Align at bottom-center
+  }),
+});
+
+// Define polygon style with red line and fill
+const polygonStyle = new ol.style.Style({
+  fill: new ol.style.Fill({
+    color: 'rgba(255, 0, 0, 0.4)', // Red fill with some transparency
+  }),
+  stroke: new ol.style.Stroke({
+    color: 'red',
+    width: 2,
   }),
 });
 
@@ -90,8 +87,20 @@ const labelStyle = (feature) => {
   });
 };
 
+// Style function for search layer
 function styleFunction(feature) {
-  return [iconStyle, labelStyle(feature)];
+  const geometryType = feature.getGeometry().getType();
+  
+  // Determine if the feature is a point or a polygon and style accordingly
+  let baseStyle;
+  if (geometryType === 'Point' || geometryType === 'MultiPoint') {
+    baseStyle = pointIconStyle;
+  } else if (geometryType === 'Polygon' || geometryType === 'MultiPolygon') {
+    baseStyle = polygonStyle;
+  }
+
+  // Return both the base style and label style
+  return [baseStyle, labelStyle(feature)];
 }
     var geoJsonObj = {
     "type": "FeatureCollection",
@@ -133,42 +142,108 @@ function styleFunction(feature) {
     });
     var map = new ol.Map({
       controls: [zoomControl],
-      layers: [brtWaterLayer, DataLayer, searchLayer],
+      layers: [brtWaterLayer],
       target: 'map',
       view: view
     });
 
-    // Click-event
-    map.on('singleclick', function (evt) {
-    var viewResolution = map.getView().getResolution();
-    var viewProjection = map.getView().getProjection();    
-    
-    var url = DataSource.getFeatureInfoUrl(
-        evt.coordinate,
-        viewResolution,
-        viewProjection,
-        {'INFO_FORMAT': 'application/json', 'QUERY_LAYERS': '{{ query_layers }}'}
-    );
-    
-    if (url) {
-        fetch(url)
-            .then(function (response) { return response.json(); })
-            .then(function (json) {
+    // Initialize an empty array to store OpenLayers layers
+    const layerInfo = [
+  ["ribasim:StorageBasinArea", "gebied.svg", "aan-/afvoergebied"],
+  ["ribasim:WaterBasinArea", "watervlak.svg", "watervlak"],
+  ["ribasim:WaterEdge", "waterlijn.svg", "waterlijn"],
+  ["ribasim:WaterPump", "gemaal.svg", "gemaal", "Pump"],
+  ["ribasim:WaterOutlet", "constant.svg", "in-/uitlaat (constant)"],
+  ["ribasim:WaterTabulatedRatingCurve", "qh.svg", "in-/uitlaat (qh)"]];
+    const openLayers = [];
+    const mapLayers = new ol.layer.Group({ layers: [] }); // Group to hold all layers
 
-                // Add feature to searchSource
-                var geoJsonFormat = new ol.format.GeoJSON();
-                var newFeature = geoJsonFormat.readFeature(json.features[0], {
-                    featureProjection: 'EPSG:28992'
-                });
-                searchSource.clear();
-                searchSource.addFeature(newFeature);
-  
-                // Extract and log the globalid - replace 'globalid' with the actual key name for the globalid in your data
-                var Id = json.features[0].id
-                //toggleInfo()
-                openInfo(Id=Id)
-            });
+    // Iterate over the list of layer metadata
+    layerInfo.forEach(([layerName, iconFilename, customLabel]) => {
+      const source = new ol.source.TileWMS({
+        url: 'http://localhost:6001/geoserver/wms',
+        params: {
+          LAYERS: layerName,
+          TILED: "true"
+        },
+        serverType: "geoserver"
+      });
+
+      // Create a layer for each source
+      const layer = new ol.layer.Tile({
+        source: source,
+        visible: true // Initially visible
+      });
+
+      // Store layer with its name for easy toggling
+      openLayers.push({ name: layerName, layer: layer });
+
+      // Add layer to the map group
+      mapLayers.getLayers().push(layer);
+    });
+
+    // Add the layer group to the OpenLayers map
+
+// mapLayers.getLayers().push(searchLayer);
+map.addLayer(mapLayers);
+map.addLayer(searchLayer);
+
+var selectedFeature = null
+
+map.on('singleclick', function (evt) {
+    const viewResolution = map.getView().getResolution();
+    const viewProjection = map.getView().getProjection();
+    const clickedCoordinate = evt.coordinate;
+
+    // clear selection
+    selectedNode = null
+    searchSource.clear();
+
+    // get layers filter
+    const visibleLayers = mapLayers.getLayers()
+        .getArray()
+        .filter((layer) => layer.getVisible());
+      
+    const ignore_layers = ['ribasim:WaterEdge']; 
+    
+    const queryLayers = visibleLayers
+        .map((layer) => {
+            const source = layer.getSource();
+            if (source instanceof ol.source.TileWMS) {
+                const layerName = source.getParams().LAYERS;
+                return !ignore_layers.includes(layerName) ? layerName : null;
+            }
+            return null;
+        })
+        .filter(Boolean)
+        .join(',');
+
+    // Extract the layer names for visible WMS layers
+
+    fetch(`http://localhost:3000/node?x=${clickedCoordinate[0]}&y=${clickedCoordinate[1]}&tolerance=${viewResolution*5}&layers=${queryLayers}`)
+      .then((response) => response.json())
+      .then((geo_json) => {
+
+     // put icon on the map
+     if (geo_json) {
+     const geoJsonFormat = new ol.format.GeoJSON();
+
+    // Read all features from the GeoJSON object at once
+    const features = geoJsonFormat.readFeatures(geo_json, {
+      featureProjection: 'EPSG:28992',
+    });
+
+    // Add all features to the searchSource in one operation
+    searchSource.addFeatures(features);
+    openInfo(geo_json.features[0].properties.node_id, geo_json.features[0].properties.node_type)
+      }
+    else {closeInfo()}
     }
+    )
+    
+
+
 });
+
   </script>
 </html>

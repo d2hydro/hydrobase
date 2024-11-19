@@ -1,9 +1,9 @@
-function parseId(Id) {
+function parseId(feature) {
     // Regular expression pattern to match "Node" and the following numeric part
     var pattern = /^([a-zA-Z]+)\.(\d+)$/;
 
     // Use the pattern to match the input string
-    var match = Id.match(pattern);
+    var match = feature.id.match(pattern);
 
     // Check if the match was successful
     if (match) {
@@ -14,7 +14,8 @@ function parseId(Id) {
         // Return an object with layer and fid properties
         return {
             layer: layer,
-            fid: fid
+            fid: fid,
+            node_id:feature.properties.node_id
         };
     } else {
         // Return null for invalid input format
@@ -22,49 +23,18 @@ function parseId(Id) {
     }
 }
 
-
-
-// Function to toggle the visibility of the div and fetch content from "/info"
-async function openInfo(Id) {
-    var result = parseId(Id);
-
-    if (result) {
-    var infoContainer = document.getElementById("info-container");
-    var infoDiv = document.getElementById("info");
-
-    // make info visible
-    infoContainer.style.display = 'block';
-
-    // set layer-selector position
-    var currentWidth = infoContainer.offsetWidth;
-    var layerSelector = document.getElementById("layer-selector");
-    layerSelector.style.left = (currentWidth + 20) + 'px';
-
-    if (infoContainer.style.display === 'block') {
-        try {
-            // Fetch content from "/info" and update the "info" div
-            const response = await fetch(`/info?fid=${result.fid}&layer=${result.layer}`);
-            const html = await response.text();
-            infoDiv.innerHTML = html;
-
-            // Check if nodeType is "Basin" and fetch additional data
-            if (result.layer === "Node") {  // we need to fix this by parsing the plotly graph in jinja2, or finding a better way.
-                // Fetching basinData
-                const basinResponse = await fetch(`/basin?node_id=${result.fid}`);
-                const basinData = await basinResponse.json();
-
-                // Create basin_profile chart
-                var basinProfileDiv = document.getElementById('basin_profile');
+function addGraph(graphData){
+                var div = document.getElementById('info_graph')
                 var trace = {
-                x: basinData.profile.area,
-                y: basinData.profile.level,
+                x: graphData.x,
+                y: graphData.y,
                 type: 'scatter',
                 mode: 'lines+markers'
                 };
                 var layout = {
-                title: 'profiel',
-                xaxis: {title: 'Oppervlak [m2]',fixedrange: true},
-                yaxis: {title: 'Hoogte [m+NAP]',fixedrange: true},
+                title: graphData.title,
+                xaxis: {title: graphData.x_axis_title,fixedrange: true},
+                yaxis: {title: graphData.y_axis_title,fixedrange: true},
                 
                 margin: {
                     t: 40,  // Top margin
@@ -80,9 +50,83 @@ async function openInfo(Id) {
                     scrollZoom: false,
                 };
                 
-                Plotly.newPlot(basinProfileDiv, [trace], layout, config);
+                Plotly.newPlot(div, [trace], layout, config);
 
             }
+
+function addTable(tableData) {
+    // Find the target div
+    var div = document.getElementById("info_table");
+
+    // Clear any existing content in the target div
+    div.innerHTML = '';
+
+    // Create the table element
+    const table = document.createElement('table');
+
+    // Iterate over the array of rows
+    tableData.forEach(rowData => {
+        // Create a new table row
+        const row = document.createElement('tr');
+
+        // Iterate over the items in the row
+        rowData.forEach(cellData => {
+            // Create a new table cell
+            const cell = document.createElement('td');
+            cell.textContent = cellData;
+            // cell.style.border = '1px solid black';
+            // cell.style.padding = '5px';
+
+            // Append the cell to the row
+            row.appendChild(cell);
+        });
+
+        // Append the row to the table
+        table.appendChild(row);
+    });
+
+    // Append the table to the target div
+    div.appendChild(table);
+}
+
+// Function to toggle the visibility of the div and fetch content from "/info"
+async function openInfo(node_id, node_type) {
+
+    if (node_id) {
+    var infoContainer = document.getElementById("info-container");
+    var infoDiv = document.getElementById("info");
+    
+
+    // make info visible
+    infoContainer.style.display = 'block';
+
+    // add info
+    if (infoContainer.style.display === 'block') {
+        try {
+            const response = await fetch(`/info?node_id=${node_id}`);
+            const html = await response.text();
+            infoDiv.innerHTML = html;
+
+            // addGraph if element info_graph exists
+            if (document.getElementById('info_graph') !== null){
+                var url = `/graph_data?node_id=${node_id}`
+                const response = await fetch(url);
+                const graphData = await response.json();
+                if (graphData !== null) { 
+                addGraph(graphData)
+                }
+            }
+
+            // addStatic if exists
+            if (document.getElementById('info_table') !== null){
+                var url = `/static_data?node_id=${node_id}`
+                const response = await fetch(url);
+                const tableData = await response.json();
+                if (tableData !== null) {
+                addTable(tableData)
+            }
+            }
+            
         } catch (error) {
             console.error('Error fetching content:', error);
         }
@@ -100,11 +144,6 @@ function closeInfo() {
 
     // clear search-source
     searchSource.clear();
-
-    // set layer-selector position
-    var currentWidth = infoContainer.offsetWidth;
-    var layerSelector = document.getElementById("layer-selector");
-    layerSelector.style.left = '20px';
 }
 
 // function update orientation

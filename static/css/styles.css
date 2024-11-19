@@ -32,39 +32,28 @@
 }
 
 /* Mobile styles */
-@media only screen and (max-width: 1050px) {
-  .info-container {
-    position: absolute;
-    bottom: 5px;
-    zoom:75%;
-    max-width: 100%;
-    min-width:300px;
-    margin-top:0px;
-    left:0px;
-    width:100%;
-    height: 30%;
-    overflow-y: visible;
-    display: none;
-   }
+
+#info-close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: black;
+  position: absolute;
+  top: 0.5em;
+  right: 0.5em; /* Adjust this value as needed */
+  z-index: 1000000;
   }
 
-  #closeButton {
+#sidebar-close-button {
     background: none;
     border: none;
     cursor: pointer;
     color: black;
     position: absolute;
-    top: 0.5em;
+    top: 1.8em;
     right: 0.5em; /* Adjust this value as needed */
     z-index: 1000000;
     }
-
-  
-
-#closeButton:hover {
-  color: blue;
-}
-
 
 .photo_container {
   max-width: 100%;
@@ -75,6 +64,7 @@
 
 .photo_container img {
   height: auto;
+  min-height: 200px;
   max-width: 100%;
   display: block;
   margin: 0 auto;
@@ -143,24 +133,29 @@
   outline: none;
 }
 
-.search-button {
+
+.custom-button {
   background-color: transparent;
   border: none;
   cursor: pointer;
   color:gray;
-  padding-right: 0.5em;
-  margin-right: 3em;
+  /* padding-right: 0.5em;
+  margin-right: 3em; */
 }
 
 /* Style for the icon */
-.search-button img {
+.custom-button img {
   transition: transform 0.3s;
 }
 
 /* Hover effect */
-.search-button:hover img {
+.custom-button:hover img {
   transform: scale(1.2);
 }
+
+#search-button {
+  padding-right: 0.5em;
+  margin-right: 3em;}
 
 /* LAYER SELECTOR */
 #layer-selector {
@@ -196,29 +191,9 @@
   color: white;
 }
 
-/* Desktop styles */
-@media only screen and (min-width: 768px) {
-  #layer-selector {
-    bottom: 10px;
-    left: 10px;
-  }
-}
 
 /* Mobile styles */
 @media only screen and (max-width: 767px) {
-  #layer-selector {
-    top: 10px;
-    left:20px!important;
-  }
-  #switchImage { 
-    width: 40px;
-    height: 40px;
-    left:0px!important;
-
-  }
-  #switchText {
-    display:none;
-  }
   .custom-zoom {  
     display: none;
   }
@@ -245,3 +220,168 @@
   }
 }
 
+/* LAYER SELECTION*/
+
+/* Sidebar styles */
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: -300px; /* Hidden initially */
+  width: 300px;
+  height: 100%;
+  background-color: #ffffff;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+  transition: right 0.3s ease;
+  z-index: 1000;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.center-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Close button (X) */
+.sidebar-close-button {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* Visible sidebar */
+.sidebar.visible {
+  right: 0;
+}
+
+/* Section styles */
+.section {
+  display: flex;
+  flex-direction: column;
+  /* gap: 4px; */
+}
+
+/* Styles for the layer controls */
+#layer-controls {
+  /* position: absolute;
+  top: 10px;
+  left: 10px;
+  background: white; */
+  padding: 10px;
+  /* border: 1px solid #ccc;
+  border-radius: 5px; */
+}
+
+#layer-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.layer-item {
+  display: flex;
+  align-items: center; /* Vertically center all items */
+  gap: 10px;
+  margin-bottom: 5px;
+}
+
+/* Icon Styling */
+.layer-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+/* Checkbox Styling */
+.layer-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0; /* Remove default margin */
+  vertical-align: middle; /* Align checkbox vertically with other elements */
+}
+
+/* Label Styling */
+.layer-item label {
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 20px; /* Match line height with icon size */
+}
+
+
+/* New toggle switch styling */
+.background-switch {
+  position: relative;
+  display: inline-block;
+  width: 38px;  /* Keep the width for the toggle switch */
+  height: 20px; /* Keep the height for the toggle switch */
+  margin-left: 10px;  /* Adjust spacing from label to align with checkboxes */
+}
+
+.background-switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 2px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+/* When the checkbox is checked, change the background color */
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+/* Focus state for the toggle switch */
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+/* When checked, move the circle to the right */
+input:checked + .slider:before {
+  transform: translateX(16px);
+}
+
+/* Style for the label (text) next to the toggle */
+#background-control {
+  display: flex;
+  gap: 10px;  /* Space between toggle and text */
+  margin-top: 10px;  /* Adjust spacing from other elements */
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toggle-label {
+  font-size: 14px;  /* Match the font size with the other elements */
+  line-height: 20px;  /* Align text vertically with the toggle */
+}
