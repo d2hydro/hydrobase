@@ -161,7 +161,7 @@ function styleFunction(feature) {
     // Iterate over the list of layer metadata
     layerInfo.forEach(([layerName, iconFilename, customLabel]) => {
       const source = new ol.source.TileWMS({
-        url: 'http://localhost:6001/geoserver/wms',
+        url: '{{ geoserver_url }}/geoserver/wms',
         params: {
           LAYERS: layerName,
           TILED: "true"
@@ -220,7 +220,7 @@ map.on('singleclick', function (evt) {
 
     // Extract the layer names for visible WMS layers
 
-    fetch(`http://localhost:3000/node?x=${clickedCoordinate[0]}&y=${clickedCoordinate[1]}&tolerance=${viewResolution*5}&layers=${queryLayers}`)
+    fetch(`{{app_url}}/node?x=${clickedCoordinate[0]}&y=${clickedCoordinate[1]}&tolerance=${viewResolution*5}&layers=${queryLayers}`)
       .then((response) => response.json())
       .then((geo_json) => {
 

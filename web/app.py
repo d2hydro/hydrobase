@@ -19,11 +19,11 @@ import json
 import pandas as pd
 
 try:
-    from .config import DATA_DIR
+    from .config import DATA_DIR, GEOSERVER_URL, APP_URL
     from .utils import layers_for_geoserver
     from .case_conversions import pascal_to_snake_case
 except ImportError:
-    from config import DATA_DIR
+    from config import DATA_DIR, GEOSERVER_URL, APP_URL
     from utils import layers_for_geoserver
     from case_conversions import pascal_to_snake_case
 
@@ -47,39 +47,6 @@ TEMPLATES_DIR = STATIC_DIR.joinpath("templates")
 BASE_ICON_URL = "static/icons/{icon_name}.ico"
 env = Environment(loader=FileSystemLoader(TEMPLATES_DIR))
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
-
-# %%Plotly playground
-import plotly.graph_objects as go
-import numpy as np
-
-np.random.seed(1)
-
-N = 100
-x = np.random.rand(N)
-y = np.random.rand(N)
-colors = np.random.rand(N)
-sz = np.random.rand(N) * 30
-
-fig = go.Figure()
-fig.add_trace(
-    go.Scatter(
-        x=x,
-        y=y,
-        mode="markers",
-        marker=go.scatter.Marker(
-            size=sz, color=colors, opacity=0.6, colorscale="Viridis"
-        ),
-    )
-)
-
-graph1Plot = fig.to_html(
-    full_html=False,
-    include_plotlyjs=False,
-    div_id="plotlyGraph1",
-    default_width="100px",
-    default_height="100px",
-)
-
 
 # %%
 # data
@@ -217,8 +184,6 @@ app = FastAPI(
     openapi_tags=tags_metadata,
 )
 
-origins = ["http://localhost:3000", "http://localhost:6001", "https://www.hydrobase.nl"]
-
 origins = ["*"]
 
 
@@ -260,6 +225,8 @@ async def ribasim_home():
         icon_url=icon_url,
         data_layers=data_layers,
         query_layers=query_layers,
+        geoserver_url=GEOSERVER_URL,
+        app_url=APP_URL,
     )
     return HTMLResponse(content=html_content, status_code=200)
 
