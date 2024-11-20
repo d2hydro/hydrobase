@@ -30,15 +30,19 @@ except ImportError:
 
 PARAMETER_MAP = {
     "drainage": {"unit": "m/s", "name": "Drainage"},
+    "demand": {"unit": "m3/s", "name": "Watervraag"},
     "flow_rate": {"unit": "m3/s", "name": "Debiet"},
     "infiltration": {"unit": "m/s", "name": "Infiltratie"},
     "level": {"unit": "m[NAP]", "name": "Waterhoogte"},
     "max_flow_rate": {"unit": "m3/s", "name": "Maximaal debiet"},
-    "max_downstream_level": {"unit": "m3/s", "name": "Waterhoogte beneden"},
+    "max_downstream_level": {"unit": "m[NAP]", "name": "Waterhoogte beneden"},
     "min_flow_rate": {"unit": "m3/s", "name": "Minimaal debiet"},
-    "min_upstream_level": {"unit": "m3/s", "name": "Waterhoogte boven"},
+    "min_level": {"unit": "m[NAP]", "name": "Minimale waterhoogte"},
+    "min_upstream_level": {"unit": "m[NAP]", "name": "Waterhoogte boven"},
     "potential_evaporation": {"unit": "m/s", "name": "Verdamping"},
     "precipitation": {"unit": "m/s", "name": "Neerslag"},
+    "priority": {"unit": "", "name": "Prioriteit"},
+    "return_factor": {"unit": "", "name": "Retourfactor"},
 }
 
 STATIC_DIR = Path(__file__).parents[1] / "static"
@@ -76,8 +80,16 @@ class Layers:
     storage_basin_area = gpd.read_file(layers_gpkg, layer="StorageBasinArea").set_index(
         "node_id"
     )
+    water_user_demand = gpd.read_file(layers_gpkg, layer="WaterUserDemand").set_index(
+        "node_id"
+    )
 
-    _node_layers = ["water_pump", "water_tabulated_rating_curve", "water_outlet"]
+    _node_layers = [
+        "water_pump",
+        "water_tabulated_rating_curve",
+        "water_outlet",
+        "water_user_demand",
+    ]
     _area_layers = ["water_basin_area", "storage_basin_area"]
 
     def get_layer(self, node_id: int):
@@ -87,6 +99,7 @@ class Layers:
             "water_tabulated_rating_curve",
             "water_basin_area",
             "storage_basin_area",
+            "water_user_demand",
         )
         return next(
             (layer for layer in layers if node_id in getattr(self, layer).index)
@@ -103,6 +116,8 @@ class Layers:
             return "constant.svg"
         elif layer == "water_tabulated_rating_curve":
             return "qh.svg"
+        elif layer == "water_user_demand":
+            return "gebruiker.svg"
 
     def _strip_layer_name(self, layer):
         return pascal_to_snake_case(layer.split(":")[1])
@@ -218,7 +233,7 @@ async def ribasim_home():
     """Fetch the Ribasim home."""
     template = env.get_template("index.html")
     icon_url = BASE_ICON_URL.format(icon_name="ribasim")
-    data_layers = "ribasim:StorageBasinArea,ribasim:WaterBasinArea,ribasim:WaterEdge,ribasim:WaterPump,ribasim:WaterOutlet,ribasim:WaterTabulatedRatingCurve"
+    data_layers = "ribasim:StorageBasinArea,ribasim:WaterBasinArea,ribasim:WaterEdge,ribasim:WaterPump,ribasim:WaterOutlet,ribasim:WaterTabulatedRatingCurve,ribasim:WaterUserDemand"
     query_layers = "ribasim:WaterBasinArea"
     html_content = template.render(
         title="Ribasim-NL",
@@ -314,7 +329,7 @@ async def info(node_id=int):
                 template = env.get_template("constant_rate.html")
                 kwargs["flow_rate"] = flow_rate
         else:
-            template = env.get_template("info_base.html")
+            template = env.get_template("constant_rate.html")
 
         html_content = template.render(**kwargs)
 

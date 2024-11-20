@@ -11,35 +11,19 @@ import pandas as pd
 colors = cycle(tab20.colors)
 
 
-# def get_html(file_name, kwargs={}):
-#     with STATIC_DIR / file_name as src:
-#         return src.read_text().format(kwargs)
-
-
-# def get_logger(log_level="INFO", log_file=None):
-#     logger = logging.getLogger(__name__)
-#     logger.setLevel(getattr(logging, log_level))
-#     if log_file is not None:
-#         log_file = LOG_DIR / log_file
-#         fh = logging.FileHandler(log_file)
-#         fh.setFormatter(
-#             logging.Formatter("%(asctime)s %(name)s %(levelname)s - %(message)s")
-#         )
-#         fh.setLevel(getattr(logging, log_level))
-#         logger.addHandler(fh)
-#     return logger
-
-
 def get_zoom_level(node_id, df):
     authority = df.at[node_id, "meta_authority"]
     if authority == "Rijkswaterstaat":
         return 0
     else:
         category = df.at[node_id, "meta_categorie"]
-        if category == "hoofdwater":
+        if pd.isna(category):
             return 1
         else:
-            return 2
+            if category == "hoofdwater":
+                return 1
+            else:
+                return 2
 
 
 # %%
@@ -62,7 +46,7 @@ def layers_for_geoserver(model):
         layers_gpkg.unlink()
 
     # split nodes on meta_category
-    for attr in ["basin", "outlet", "tabulated_rating_curve", "pump"]:
+    for attr in ["basin", "outlet", "tabulated_rating_curve", "pump", "user_demand"]:
         df = getattr(model, attr).node.df
         df.loc[df["meta_categorie"].isna(), "meta_categorie"] = "niet_bergend"
         mask = df["meta_categorie"] == "bergend"
@@ -88,11 +72,18 @@ def layers_for_geoserver(model):
     write_layers(df, attr="Edge", mask=mask)
 
     # write boundaries
-    if not model.flow_boundary.node.df.empty:
-        model.flow_boundary.node.df.to_file(layers_gpkg, layer="FlowBoundary")
-    if not model.level_boundary.node.df.empty:
-        model.level_boundary.node.df.to_file(layers_gpkg, layer="LevelBoundary")
-
+    df = model.flow_boundary.node.df.reset_index()
+    if not df.empty:
+        df.loc[:, "meta_zoom_level"] = df.loc[:, "node_id"].apply(
+            lambda x: get_zoom_level(x, model.flow_boundary.node.df)
+        )
+        df.to_file(layers_gpkg, layer="FlowBoundary")
+    df = model.level_boundary.node.df.reset_index()
+    if not df.empty:
+        df.loc[:, "meta_zoom_level"] = df.loc[:, "node_id"].apply(
+            lambda x: get_zoom_level(x, model.level_boundary.node.df)
+        )
+        df.to_file(layers_gpkg, layer="LevelBoundary")
     return layers_gpkg
 
 

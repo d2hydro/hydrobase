@@ -154,7 +154,11 @@ function styleFunction(feature) {
   ["ribasim:WaterEdge", "waterlijn.svg", "waterlijn"],
   ["ribasim:WaterPump", "gemaal.svg", "gemaal", "Pump"],
   ["ribasim:WaterOutlet", "constant.svg", "in-/uitlaat (constant)"],
-  ["ribasim:WaterTabulatedRatingCurve", "qh.svg", "in-/uitlaat (qh)"]];
+  ["ribasim:WaterTabulatedRatingCurve", "qh.svg", "in-/uitlaat (qh)"],
+  ["ribasim:WaterUserDemand", "gebruiker.svg", "gebruiker"],
+  ["ribasim:FlowBoundary", "flow_boundary.svg", "Q-randvoorwaarde"],
+  ["ribasim:LevelBoundary", "level_boundary.svg", "H-randvoorwaarde"],
+  ];
     const openLayers = [];
     const mapLayers = new ol.layer.Group({ layers: [] }); // Group to hold all layers
 
