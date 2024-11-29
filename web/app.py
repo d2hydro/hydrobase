@@ -2,7 +2,7 @@
 import geopandas as gpd
 
 """LHM app for the Netherlands"""
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -12,7 +12,6 @@ import shapely
 # from .utils import get_logger
 from jinja2 import Environment, FileSystemLoader
 from pathlib import Path
-import httpx
 from ribasim import Model
 from shapely.geometry import Point
 import json
@@ -60,6 +59,11 @@ structures_gdf = gpd.read_file(
     engine="pyogrio",
     fid_as_index=True,
 )
+
+def get_query(row):
+    if
+
+
 
 ribasim_toml = DATA_DIR.joinpath("lhm", "lhm.toml")
 model = Model.read(ribasim_toml)
@@ -246,22 +250,6 @@ async def ribasim_home():
     return HTMLResponse(content=html_content, status_code=200)
 
 
-@app.get("/hydamo", include_in_schema=False, tags=["HyDAMO"])
-async def hydamo_home():
-    """Fetch the HyDAMO home."""
-    template = env.get_template("index.html")
-    icon_url = BASE_ICON_URL.format(icon_name="hydamo_plus")
-    data_layers = "hydamo:bathymetrie,hydamo:krw_waterlichamen,hydamo:hydroobject,hydamo:kunstwerk"
-    query_layers = "hydamo:kunstwerk"
-    html_content = template.render(
-        title="HyDAMO+",
-        icon_url=icon_url,
-        data_layers=data_layers,
-        query_layers=query_layers,
-    )
-    return HTMLResponse(content=html_content, status_code=200)
-
-
 @app.get("/ribasim/manifest", include_in_schema=False, tags=["Ribasim"])
 async def get_manifest():
     return manifest
@@ -289,7 +277,12 @@ async def node(x: float, y: float, tolerance: float, layers: str):
         return json.loads(feature.to_json())
 
 
-@app.get("/info", include_in_schema=False, tags=["Ribasim"])
+@app.get("/search", include_in_schema=False)
+async def search(query: str):
+    return ["test1", "test2"]
+
+
+@app.get("/info", include_in_schema=False)
 async def info(node_id=int):
     """
     - **x**: x-coordinate
@@ -326,10 +319,10 @@ async def info(node_id=int):
             if isinstance(flow_rate, pd.Series):
                 template = env.get_template("info_graph.html")
             else:
-                template = env.get_template("constant_rate.html")
+                template = env.get_template("info_constant.html")
                 kwargs["flow_rate"] = flow_rate
         else:
-            template = env.get_template("constant_rate.html")
+            template = env.get_template("info_constant.html")
 
         html_content = template.render(**kwargs)
 
@@ -389,7 +382,7 @@ async def static_data(node_id: int):
 
 
 @app.get("/outlet/control", tags=["Ribasim"])
-async def outlet(node_id: int) -> dict:
+async def outlet(node_id: int) -> dict | None:
     """
     - **node_id**: Ribasim node_id
     """
@@ -404,7 +397,6 @@ async def outlet(node_id: int) -> dict:
             model.edge.df.edge_type == "control"
         )
         control_node_id = model.edge.df[mask].iloc[0].from_node_id
-        control_name = model.discrete_control.node.df.at[control_node_id, "name"]
 
         condition_df = model.discrete_control.condition.df[
             model.discrete_control.condition.df["node_id"] == control_node_id
@@ -423,6 +415,8 @@ async def outlet(node_id: int) -> dict:
 
         static = {"control": control_df[["flow_rate", "control_state"]].to_dict("list")}
         return static
+    else:
+        return None
 
 
 @app.get(
@@ -435,33 +429,3 @@ async def file(file_path: str, response: Response):
         return Response(content=content, media_type="image/png")
     else:
         raise HTTPException(status_code=404, detail="File not found")
-
-
-@app.get("/geoserver/{path:path}", include_in_schema=False)
-async def proxy_geoserver(path: str, request: Request):
-    # Combine the path and query parameters to construct the full URL
-    original_url = f"http://localhost:6001/geoserver/{path}?{request.url.query}"
-
-    # Make a request to the GeoServer
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(original_url)
-            response.raise_for_status()
-
-            content_type = response.headers.get(
-                "content-type", "application/octet-stream"
-            )
-
-            # Return the binary data directly
-            return Response(content=response.content, media_type=content_type)
-        except httpx.HTTPError as exc:
-            raise HTTPException(
-                status_code=exc.response.status_code,
-                detail="Proxying error",
-                headers=exc.response.headers,
-            )
-
-
-# point = Point(149406.21322412725, 399578.2228710489)
-# tolerance = 1
-# layers = ["water_basin_area", "storage_basin_area"]

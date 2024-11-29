@@ -29,45 +29,18 @@
         {% block map_content %}{% endblock %}
       </div>
     
-      {% block info_container %}{% endblock %}
-
-      
+      {% block info_container %}{% endblock %}    
     
       <!-- search -->
-      <form id="search-form">
-        <button type="button" class="custom-button" title="Lagen" id="layers-toggle-button">
-          <img src="static/icons/layer_selector.svg" alt="SelectLayers" class="custom-icon">
-        </button>
-        <input type="text" id="search-input" placeholder="Zoek in het netwerk" disabled=>
-        <button type="button" class="custom-button" title="Zoeken" id="search-button">
-          <img src="static/icons/search.svg" alt="Search" class="custom-icon">
-        </button>
-        <button id="info-close-button" class="custom-button" title="Close">
-          <img src="static/icons/close.svg" alt="Close" class="custom-icon">
-        </button>
-      </form>
+      {% block search_container %}{% endblock %}   
 
-      <!--TODO: make sure search works-->
-      <script>
-        // Disable the input and button
-        document.getElementById('search-input').disabled = true;
-        document.getElementById('search-button').disabled = true;
-      </script>
-
+      <!-- layers selector -->
       {% block layers_selector %}{% endblock %}
-    
-      <!-- <input id="search-box" placeholder="Zoek in het netwerk">
-      <div id="search-box" class="search-box">
-        {% block search_box_content %}{% endblock %}
-      </div>     -->
+
     </div>
-    
-    <script>
-      // Initial check on orientation
-      updateOrientation();
-      
-      // Event listener to detect rotation (orientationchange)
-      window.addEventListener('orientationchange', updateOrientation);
-    </script>
+
+    <script type="text/javascript">
+
+  </script>
     </body>
     </html>

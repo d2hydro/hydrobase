@@ -1,0 +1,71 @@
+<html>
+<form id="search-form">
+    <button type="button" class="custom-button" title="Lagen" id="layers-toggle-button">
+      <img src="static/icons/layer_selector.svg" alt="SelectLayers" class="custom-icon">
+    </button>
+    <input type="text" id="search-input" placeholder="Zoek in het netwerk">
+    <button type="button" class="custom-button" title="Zoeken" id="search-button">
+      <img src="static/icons/search.svg" alt="Search" class="custom-icon">
+    </button>
+    <button id="info-close-button" class="custom-button" title="Close">
+      <img src="static/icons/close.svg" alt="Close" class="custom-icon">
+    </button>
+    <div class="search-results" id="search-results"></div>
+  </form>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", () => {
+  const searchInput = document.getElementById("search-input");
+  const searchResults = document.getElementById("search-results");
+
+  // Fetch search results from the API
+  async function fetchSearchResults(query) {
+    try {
+      const response = await fetch(`./search?query=${encodeURIComponent(query)}`);
+      if (response.ok) {
+        return await response.json();
+      }
+      throw new Error("Failed to fetch search results.");
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  }
+
+  // Render search results
+  function renderSearchResults(results) {
+    // Clear previous results
+    searchResults.innerHTML = "";
+
+    // Add search result items
+    results.forEach((result) => {
+      const item = document.createElement("div");
+      item.className = "search-result-item";
+      item.textContent = result
+      item.addEventListener("click", () => {
+        console.log("Selected:", result);
+        searchResults.style.display = "none";
+      });
+      searchResults.appendChild(item);
+    });
+
+    searchResults.style.display = "block";
+  }
+
+  // Listen for input events
+  searchInput.addEventListener("input", async (event) => {
+    const query = event.target.value.trim();
+    if (query.length > 0) {
+      const results = await fetchSearchResults(query);
+      console.log(results)
+      renderSearchResults(results);
+    } else {
+      searchResults.style.display = "none";
+    }
+  });
+});
+
+</script>
+
+</html>
