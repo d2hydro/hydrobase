@@ -1,0 +1,16 @@
+<layer>
+  <name>WaterOutlet</name>
+  <id>LayerInfoImpl--2bdb9e3a:19306ddda67:-7ff7</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl--2bdb9e3a:19306ddda67:-7ffb</id>
+  </defaultStyle>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl--2bdb9e3a:19306ddda67:-7ff8</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+  <dateCreated>2024-11-07 14:37:01.595 UTC</dateCreated>
+</layer>

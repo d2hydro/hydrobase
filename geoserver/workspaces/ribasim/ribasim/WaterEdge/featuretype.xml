@@ -1,0 +1,68 @@
+<featureType>
+  <id>FeatureTypeInfoImpl-4469a1bf:192e2b52c78:-7fe3</id>
+  <name>WaterEdge</name>
+  <nativeName>WaterEdge</nativeName>
+  <namespace>
+    <id>NamespaceInfoImpl--676ff6b0:192e1fc74c2:-7fff</id>
+  </namespace>
+  <title>WaterEdge</title>
+  <keywords>
+    <string>features</string>
+    <string>WaterEdge</string>
+  </keywords>
+  <nativeCRS class="projected">PROJCS[&quot;Amersfoort / RD New&quot;, &#xd;
+  GEOGCS[&quot;Amersfoort&quot;, &#xd;
+    DATUM[&quot;Amersfoort&quot;, &#xd;
+      SPHEROID[&quot;Bessel 1841&quot;, 6377397.155, 299.1528128, AUTHORITY[&quot;EPSG&quot;,&quot;7004&quot;]], &#xd;
+      TOWGS84[565.2369, 50.0087, 465.658, -0.40685733032239757, -0.3507326765425626, 1.8703473836067956, 4.0812], &#xd;
+      AUTHORITY[&quot;EPSG&quot;,&quot;6289&quot;]], &#xd;
+    PRIMEM[&quot;Greenwich&quot;, 0.0, AUTHORITY[&quot;EPSG&quot;,&quot;8901&quot;]], &#xd;
+    UNIT[&quot;degree&quot;, 0.017453292519943295], &#xd;
+    AXIS[&quot;Geodetic longitude&quot;, EAST], &#xd;
+    AXIS[&quot;Geodetic latitude&quot;, NORTH], &#xd;
+    AUTHORITY[&quot;EPSG&quot;,&quot;4289&quot;]], &#xd;
+  PROJECTION[&quot;Oblique_Stereographic&quot;, AUTHORITY[&quot;EPSG&quot;,&quot;9809&quot;]], &#xd;
+  PARAMETER[&quot;central_meridian&quot;, 5.387638888888891], &#xd;
+  PARAMETER[&quot;latitude_of_origin&quot;, 52.15616055555556], &#xd;
+  PARAMETER[&quot;scale_factor&quot;, 0.9999079], &#xd;
+  PARAMETER[&quot;false_easting&quot;, 155000.0], &#xd;
+  PARAMETER[&quot;false_northing&quot;, 463000.0], &#xd;
+  UNIT[&quot;m&quot;, 1.0], &#xd;
+  AXIS[&quot;Easting&quot;, EAST], &#xd;
+  AXIS[&quot;Northing&quot;, NORTH], &#xd;
+  AUTHORITY[&quot;EPSG&quot;,&quot;28992&quot;]]</nativeCRS>
+  <srs>EPSG:28992</srs>
+  <nativeBoundingBox>
+    <minx>634.5732789819012</minx>
+    <maxx>284300.0254094796</maxx>
+    <miny>306594.5543000576</miny>
+    <maxy>636981.7698870874</maxy>
+    <crs class="projected">EPSG:28992</crs>
+  </nativeBoundingBox>
+  <latLonBoundingBox>
+    <minx>3.0501174525180246</minx>
+    <maxx>7.345047048668708</maxx>
+    <miny>50.72860969022719</miny>
+    <maxy>53.718455402582535</maxy>
+    <crs>EPSG:4326</crs>
+  </latLonBoundingBox>
+  <projectionPolicy>FORCE_DECLARED</projectionPolicy>
+  <enabled>true</enabled>
+  <metadata>
+    <entry key="cachingEnabled">false</entry>
+  </metadata>
+  <store class="dataStore">
+    <id>DataStoreInfoImpl-4469a1bf:192e2b52c78:-8000</id>
+  </store>
+  <serviceConfiguration>false</serviceConfiguration>
+  <simpleConversionEnabled>false</simpleConversionEnabled>
+  <internationalTitle/>
+  <internationalAbstract/>
+  <maxFeatures>0</maxFeatures>
+  <numDecimals>0</numDecimals>
+  <padWithZeros>false</padWithZeros>
+  <forcedDecimal>false</forcedDecimal>
+  <overridingServiceSRS>false</overridingServiceSRS>
+  <skipNumberMatched>false</skipNumberMatched>
+  <circularArcPresent>false</circularArcPresent>
+</featureType>

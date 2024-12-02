@@ -1,0 +1,17 @@
+<layer>
+  <name>LevelBoundary</name>
+  <id>LayerInfoImpl--afe2ea3:19348f74346:-7ff6</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl--afe2ea3:19348f74346:-7fff</id>
+  </defaultStyle>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl--afe2ea3:19348f74346:-7ff7</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+  <dateCreated>2024-11-20 09:48:34.46 UTC</dateCreated>
+  <dateModified>2024-11-20 10:01:10.610 UTC</dateModified>
+</layer>

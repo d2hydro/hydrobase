@@ -1,0 +1,16 @@
+<layer>
+  <name>WaterUserDemand</name>
+  <id>LayerInfoImpl-42002dd1:19345a9dc39:-7ffa</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl-42002dd1:19345a9dc39:-7fff</id>
+  </defaultStyle>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl-42002dd1:19345a9dc39:-7ffb</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+  <dateCreated>2024-11-19 19:21:12.753 UTC</dateCreated>
+</layer>

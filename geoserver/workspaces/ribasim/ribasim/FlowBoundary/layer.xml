@@ -1,0 +1,17 @@
+<layer>
+  <name>FlowBoundary</name>
+  <id>LayerInfoImpl--afe2ea3:19348f74346:-7ffa</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl--afe2ea3:19348f74346:-8000</id>
+  </defaultStyle>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl--afe2ea3:19348f74346:-7ffb</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+  <dateCreated>2024-11-20 09:48:14.623 UTC</dateCreated>
+  <dateModified>2024-11-20 10:00:09.706 UTC</dateModified>
+</layer>
