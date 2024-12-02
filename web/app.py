@@ -53,13 +53,6 @@ templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 # %%
 # data
-structures_gdf = gpd.read_file(
-    DATA_DIR.joinpath("hydamo", "hydamo.gpkg"),
-    layer="kunstwerken",
-    engine="pyogrio",
-    fid_as_index=True,
-)
-
 ribasim_toml = DATA_DIR.joinpath("lhm", "lhm.toml")
 model = Model.read(ribasim_toml)
 
@@ -172,10 +165,6 @@ tags_metadata = [
     {
         "name": "Ribasim",
         "description": "RIBASIM LHM netwerk",
-    },
-    {
-        "name": "HyDAMO",
-        "description": "HyDAMO+ basisgegevens",
     },
 ]
 
