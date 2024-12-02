@@ -37,3 +37,7 @@ notebooks/.ipynb_checkpoints/*
 notebooks/*.py
 frontend/data/SOBEK_H_LOCATIONS.csv
 backend/scripts/*
+
+# pixi environments
+.pixi
+*.egg-info
