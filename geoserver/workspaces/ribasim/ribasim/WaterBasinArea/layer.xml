@@ -1,0 +1,17 @@
+<layer>
+  <name>WaterBasinArea</name>
+  <id>LayerInfoImpl-4469a1bf:192e2b52c78:-7fea</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl-4469a1bf:192e2b52c78:-7ffc</id>
+  </defaultStyle>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl-4469a1bf:192e2b52c78:-7feb</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+  <dateCreated>2024-10-31 13:29:33.799 UTC</dateCreated>
+  <dateModified>2024-11-07 11:51:29.869 UTC</dateModified>
+</layer>

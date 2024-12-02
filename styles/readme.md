@@ -1,0 +1,1 @@
+## Styles exported from QGIS, used in GeoServer

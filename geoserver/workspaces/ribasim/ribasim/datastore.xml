@@ -1,0 +1,23 @@
+<dataStore>
+  <id>DataStoreInfoImpl-4469a1bf:192e2b52c78:-8000</id>
+  <name>ribasim</name>
+  <description>ribasim</description>
+  <type>GeoPackage</type>
+  <enabled>true</enabled>
+  <workspace>
+    <id>WorkspaceInfoImpl--676ff6b0:192e1fc74c2:-8000</id>
+  </workspace>
+  <connectionParameters>
+    <entry key="fetch size">1000</entry>
+    <entry key="Expose primary keys">false</entry>
+    <entry key="Batch insert size">1</entry>
+    <entry key="database">file://D:/hydrobase_data/lhm/geoserver_layers.gpkg</entry>
+    <entry key="read_only">false</entry>
+    <entry key="dbtype">geopkg</entry>
+    <entry key="namespace">www.hydrobase.nl/ribasim</entry>
+  </connectionParameters>
+  <__default>false</__default>
+  <dateCreated>2024-10-31 13:12:57.207 UTC</dateCreated>
+  <dateModified>2024-10-31 13:12:58.524 UTC</dateModified>
+  <disableOnConnFailure>false</disableOnConnFailure>
+</dataStore>

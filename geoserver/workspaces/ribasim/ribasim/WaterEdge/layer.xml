@@ -1,0 +1,16 @@
+<layer>
+  <name>WaterEdge</name>
+  <id>LayerInfoImpl-4469a1bf:192e2b52c78:-7fe2</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl-4469a1bf:192e2b52c78:-7fe6</id>
+  </defaultStyle>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl-4469a1bf:192e2b52c78:-7fe3</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+  <dateCreated>2024-10-31 13:56:34.506 UTC</dateCreated>
+</layer>

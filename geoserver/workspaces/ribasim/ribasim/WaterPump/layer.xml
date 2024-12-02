@@ -1,0 +1,17 @@
+<layer>
+  <name>WaterPump</name>
+  <id>LayerInfoImpl--2bdb9e3a:19306ddda67:-7ffe</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl--2bdb9e3a:19306ddda67:-8000</id>
+  </defaultStyle>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl--2bdb9e3a:19306ddda67:-7fff</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+  <dateCreated>2024-11-07 13:44:13.956 UTC</dateCreated>
+  <dateModified>2024-11-07 14:11:16.155 UTC</dateModified>
+</layer>

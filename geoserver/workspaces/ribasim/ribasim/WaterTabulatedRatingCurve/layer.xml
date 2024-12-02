@@ -1,0 +1,16 @@
+<layer>
+  <name>WaterTabulatedRatingCurve</name>
+  <id>LayerInfoImpl--2bdb9e3a:19306ddda67:-7ff2</id>
+  <type>VECTOR</type>
+  <defaultStyle>
+    <id>StyleInfoImpl--2bdb9e3a:19306ddda67:-7ff6</id>
+  </defaultStyle>
+  <resource class="featureType">
+    <id>FeatureTypeInfoImpl--2bdb9e3a:19306ddda67:-7ff3</id>
+  </resource>
+  <attribution>
+    <logoWidth>0</logoWidth>
+    <logoHeight>0</logoHeight>
+  </attribution>
+  <dateCreated>2024-11-07 14:45:11.633 UTC</dateCreated>
+</layer>
