@@ -60,11 +60,6 @@ structures_gdf = gpd.read_file(
     fid_as_index=True,
 )
 
-def get_query(row):
-    if
-
-
-
 ribasim_toml = DATA_DIR.joinpath("lhm", "lhm.toml")
 model = Model.read(ribasim_toml)
 
@@ -263,7 +258,6 @@ async def node(x: float, y: float, tolerance: float, layers: str):
     - **tolerance**: tolerance around point for searching objects
     - **layers**: layers as a filter
     """
-    print(layers)
     point = Point(x, y)
     feature = app_layers.get_feature_by_point(
         point, tolerance, layers=layers.split(",")
@@ -279,7 +273,10 @@ async def node(x: float, y: float, tolerance: float, layers: str):
 
 @app.get("/search", include_in_schema=False)
 async def search(query: str):
-    return ["test1", "test2"]
+    if len(query) > 1:
+        return node_table[node_table.name.str.contains(f"(?i){query}")].name.to_list()
+    else:
+        return []
 
 
 @app.get("/info", include_in_schema=False)
