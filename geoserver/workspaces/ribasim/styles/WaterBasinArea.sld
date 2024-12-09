@@ -73,6 +73,47 @@
 					</se:PolygonSymbolizer>
 				</se:Rule>
 			</se:FeatureTypeStyle>
+                     <se:FeatureTypeStyle>
+                <!-- Add a new rule for the label -->
+                <se:Rule>
+                    <se:Name>Label meta_streefpeil</se:Name>
+                  
+                   <ogc:Filter>
+                        <!-- Check if meta_streefpeil is greater than or equal to 0 -->
+                        <ogc:PropertyIsGreaterThanOrEqualTo>
+                            <ogc:PropertyName>meta_streefpeil</ogc:PropertyName>
+                            <ogc:Literal>-9999</ogc:Literal>
+                        </ogc:PropertyIsGreaterThanOrEqualTo>
+                    </ogc:Filter>
+                  <se:MaxScaleDenominator>150000</se:MaxScaleDenominator>
+                    <se:TextSymbolizer>
+                        <se:Label>
+                            <ogc:Function name="Concatenate">
+                                <ogc:Literal>SP</ogc:Literal>
+                                <ogc:Literal>&#160;</ogc:Literal>
+                                <ogc:PropertyName>meta_streefpeil</ogc:PropertyName>
+                               <ogc:Literal>&#160;</ogc:Literal>
+                                <ogc:Literal> m[NAP]</ogc:Literal>
+                            </ogc:Function>
+                        </se:Label>
+						<se:Font>
+							<se:SvgParameter name="font-family">Arial</se:SvgParameter>
+							<se:SvgParameter name="font-size">13</se:SvgParameter>
+						</se:Font>
+                        <se:LabelPlacement>
+                            <se:PointPlacement>
+                                <se:AnchorPoint>
+                                    <se:AnchorPointX>0.5</se:AnchorPointX>
+                                    <se:AnchorPointY>0.5</se:AnchorPointY>
+                                </se:AnchorPoint>
+                            </se:PointPlacement>
+                        </se:LabelPlacement>
+                        <se:Fill>
+                            <se:SvgParameter name="fill">#000000</se:SvgParameter>
+                        </se:Fill>
+                    </se:TextSymbolizer>
+                </se:Rule>
+            </se:FeatureTypeStyle>
 		</UserStyle>
 	</NamedLayer>
 </StyledLayerDescriptor>

@@ -1,0 +1,13 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 30 30" fill="none">
+  <!-- Outer Circle -->
+  <circle cx="15" cy="15" r="14" stroke="#374151" stroke-width="2" fill="none"/>
+  
+  <!-- Text Balloon -->
+  <path d="M10 10C10 8.89543 10.8954 8 12 8H18C19.1046 8 20 8.89543 20 10V14C20 15.1046 19.1046 16 18 16H13L10 18V10Z" 
+        stroke="#374151" stroke-width="1.5" fill="none"/>
+
+  <!-- Text Lines -->
+  <line x1="12.5" y1="11.5" x2="17.5" y2="11.5" stroke="#374151" stroke-width="1"/>
+  <line x1="12.5" y1="13.5" x2="16.5" y2="13.5" stroke="#374151" stroke-width="1"/>
+</svg>

@@ -12,7 +12,7 @@ colors = cycle(tab20.colors)
 
 
 def get_zoom_level(node_id, df):
-    authority = df.at[node_id, "meta_authority"]
+    authority = df.at[node_id, "meta_waterbeheerder"]
     if authority == "Rijkswaterstaat":
         return 0
     else:
@@ -46,24 +46,39 @@ def layers_for_geoserver(model):
         layers_gpkg.unlink()
 
     # split nodes on meta_category
-    for attr in ["basin", "outlet", "tabulated_rating_curve", "pump", "user_demand"]:
+    for attr in [
+        "basin",
+        "outlet",
+        "tabulated_rating_curve",
+        "pump",
+        "user_demand",
+        "manning_resistance",
+        "linear_resistance",
+    ]:
         df = getattr(model, attr).node.df
-        df.loc[df["meta_categorie"].isna(), "meta_categorie"] = "niet_bergend"
-        mask = df["meta_categorie"] == "bergend"
-        df.loc[~mask, "meta_zoom_level"] = df[~mask].apply(
-            (lambda x: get_zoom_level(x.name, df)), axis=1
-        )
-        write_layers(df, attr, mask)
-
-        if attr == "basin":
-            df = model.basin.area.df
-            mask = df.node_id.isin(mask[mask].index)
-            df.loc[mask, "meta_color"] = [rgb2hex(next(colors)) for _ in df[mask].index]
-            df.loc[mask, "meta_streefpeil"] = pd.Series(dtype=float)
-            df.loc[~mask, "meta_zoom_level"] = df.loc[~mask, "node_id"].apply(
-                lambda x: get_zoom_level(x, model.basin.node.df)
+        if not df.empty:
+            df.loc[df["meta_categorie"].isna(), "meta_categorie"] = "niet_bergend"
+            mask = df["meta_categorie"] == "bergend"
+            df.loc[~mask, "meta_zoom_level"] = df[~mask].apply(
+                (lambda x: get_zoom_level(x.name, df)), axis=1
             )
-            write_layers(df, attr="basin_area", mask=mask)
+            write_layers(df, attr, mask)
+
+            if attr == "basin":
+                df = model.basin.area.df
+                mask = df.node_id.isin(mask[mask].index)
+                df.loc[mask, "meta_color"] = [
+                    rgb2hex(next(colors)) for _ in df[mask].index
+                ]
+                df.loc[mask, "meta_streefpeil"] = pd.Series(dtype=float)
+                df.loc[~mask, "meta_zoom_level"] = df.loc[~mask, "node_id"].apply(
+                    lambda x: get_zoom_level(x, model.basin.node.df)
+                )
+                model.basin.area.df.loc[
+                    model.basin.area.df.meta_streefpeil == "<NA>", ["meta_streefpeil"]
+                ] = None
+
+                write_layers(df, attr="basin_area", mask=mask)
 
     # split edges on meta_category
     df = model.edge.df

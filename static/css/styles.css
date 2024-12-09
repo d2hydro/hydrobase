@@ -1,4 +1,3 @@
-
 #map-container {
   position: relative;
   width: 100%;
@@ -11,27 +10,20 @@
   height: 100vh;
 }
 
-/* Common styles for both desktop and mobile */
+
 .info-container {
   background-color: white;
   z-index: 1000;
-}
-
-/* Desktop styles */
-@media only screen and (min-width: 1050px) {
-  .info-container {
     position: absolute;
     min-width: 300px;
     max-width: 100%;
     width: 500px;
     height: 100%;
-    top:0px;
-    overflow-y: visible;
+    top: 0px;
+    overflow-y: scroll;
     display: none;
-  }
 }
 
-/* Mobile styles */
 
 #info-close-button {
   background: none;
@@ -42,24 +34,24 @@
   top: 0.5em;
   right: 0.5em; /* Adjust this value as needed */
   z-index: 1000000;
-  }
+}
 
 #sidebar-close-button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: black;
-    position: absolute;
-    top: 1.8em;
-    right: 0.5em; /* Adjust this value as needed */
-    z-index: 1000000;
-    }
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: black;
+  position: absolute;
+  top: 1.8em;
+  right: 0.5em; /* Adjust this value as needed */
+  z-index: 1000000;
+}
 
 .photo_container {
   max-width: 100%;
   height: auto;
   margin-bottom: 20px;
-  margin-top:0px;
+  margin-top: 0px;
 }
 
 .photo_container img {
@@ -73,10 +65,10 @@
 .info_header {
   padding-left: 10px;
   padding-right: 10px;
-  left:0px;
-  right:0px;
+  left: 0px;
+  right: 0px;
   font-size: 1.075rem;
-  font-family: "Google Sans",Roboto,Arial,sans-serif;
+  font-family: 'Google Sans', Roboto, Arial, sans-serif;
   font-weight: 300;
   letter-spacing: 0;
   line-height: 1.45rem;
@@ -91,9 +83,11 @@
   border-collapse: collapse;
 }
 
-.info_properties table, th, td {
+.info_properties table,
+th,
+td {
   border: none;
-  font-family: Roboto,Arial,sans-serif;
+  font-family: Roboto, Arial, sans-serif;
   font-size: 0.975rem;
   font-weight: 300;
   letter-spacing: 0;
@@ -171,12 +165,11 @@
   font-size: 14px;
 }
 
-
 .custom-button {
   background-color: transparent;
   border: none;
   cursor: pointer;
-  color:gray;
+  color: gray;
   /* padding-right: 0.5em;
   margin-right: 3em; */
 }
@@ -193,7 +186,8 @@
 
 #search-button {
   padding-right: 0.5em;
-  margin-right: 3em;}
+  margin-right: 3em;
+}
 
 /* LAYER SELECTOR */
 #layer-selector {
@@ -219,7 +213,7 @@
 
 .img-container:hover #switchImage {
   border-width: 3px;
-} 
+}
 
 #switchText {
   position: absolute;
@@ -229,10 +223,9 @@
   color: white;
 }
 
-
 /* Mobile styles */
 @media only screen and (max-width: 767px) {
-  .custom-zoom {  
+  .custom-zoom {
     display: none;
   }
 }
@@ -337,7 +330,7 @@
 }
 
 /* Checkbox Styling */
-.layer-item input[type="checkbox"] {
+.layer-item input[type='checkbox'] {
   width: 16px;
   height: 16px;
   margin: 0; /* Remove default margin */
@@ -351,17 +344,16 @@
   line-height: 20px; /* Match line height with icon size */
 }
 
-
 /* New toggle switch styling */
 .background-switch {
   position: relative;
   display: inline-block;
-  width: 38px;  /* Keep the width for the toggle switch */
+  width: 38px; /* Keep the width for the toggle switch */
   height: 20px; /* Keep the height for the toggle switch */
-  margin-left: 10px;  /* Adjust spacing from label to align with checkboxes */
+  margin-left: 10px; /* Adjust spacing from label to align with checkboxes */
 }
 
-.background-switch input { 
+.background-switch input {
   opacity: 0;
   width: 0;
   height: 0;
@@ -375,30 +367,30 @@
   right: 0;
   bottom: 0;
   background-color: #ccc;
-  transition: .4s;
+  transition: 0.4s;
   border-radius: 34px;
 }
 
 .slider:before {
   position: absolute;
-  content: "";
+  content: '';
   height: 16px;
   width: 16px;
   left: 4px;
   bottom: 2px;
   background-color: white;
-  transition: .4s;
+  transition: 0.4s;
   border-radius: 50%;
 }
 
 /* When the checkbox is checked, change the background color */
 input:checked + .slider {
-  background-color: #2196F3;
+  background-color: #2196f3;
 }
 
 /* Focus state for the toggle switch */
 input:focus + .slider {
-  box-shadow: 0 0 1px #2196F3;
+  box-shadow: 0 0 1px #2196f3;
 }
 
 /* When checked, move the circle to the right */
@@ -409,8 +401,8 @@ input:checked + .slider:before {
 /* Style for the label (text) next to the toggle */
 #background-control {
   display: flex;
-  gap: 10px;  /* Space between toggle and text */
-  margin-top: 10px;  /* Adjust spacing from other elements */
+  gap: 10px; /* Space between toggle and text */
+  margin-top: 10px; /* Adjust spacing from other elements */
 }
 
 .toggle-row {
@@ -420,6 +412,58 @@ input:checked + .slider:before {
 }
 
 .toggle-label {
-  font-size: 14px;  /* Match the font size with the other elements */
-  line-height: 20px;  /* Align text vertically with the toggle */
+  font-size: 14px; /* Match the font size with the other elements */
+  line-height: 20px; /* Align text vertically with the toggle */
+}
+
+/* Feedback modal */
+/* Modal background */
+.feedback-modal {
+  display: none; /* Hidden by default */
+  position: fixed;
+  z-index: 1000; /* Sits on top of other content */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+}
+
+/* Modal content */
+.feedback-modal-content {
+  position: relative;
+  margin: 15% auto;
+  padding: 20px;
+  width: 80%;
+  max-width: 400px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Close button */
+.feedback-close-button {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+}
+
+/* Submit button */
+.feedback-submit-button {
+  margin-top: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.feedback-submit-button:hover {
+  background-color: #0056b3;
 }

@@ -1,21 +1,17 @@
+<!--base with layout-->
 {% extends "base.html" %}
 
-{% block map_content %}
-  {% include "map.html" %}
-{% endblock %}
+<!--map container-->
+{% block map_content %} {% include "map.html" %} {% endblock %}
 
-{% block info_container %}
-  {% include "info_container.html" %}
-{% endblock %}
+<!--info container-->
+{% block info_container %} {% include "info_container.html" %} {% endblock %}
 
-{% block search_container %}
-  {% include "search_container.html" %}
-{% endblock %}
+<!--search container-->
+{% block search_container %} {% include "search_container.html" %} {% endblock %}
 
-{% block layers_selector %}
-  {% include "layers_selector.html" %}
-{% endblock %}
+<!--layers selector container-->
+{% block layers_selector %} {% include "layers_selector.html" %} {% endblock %}
 
-{% block layers_toggle_content %}
-  {% include "layers_toggle.html" %}
-{% endblock %}
+<!--feedback container-->
+{% block feedback_container %} {% include "feedback_container.html" %} {% endblock %}

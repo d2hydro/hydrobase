@@ -16,32 +16,63 @@ from ribasim import Model
 from shapely.geometry import Point
 import json
 import pandas as pd
+from pydantic import BaseModel
 
 try:
-    from .config import DATA_DIR, GEOSERVER_URL, APP_URL
+    from .config import DATA_DIR, GEOSERVER_URL, APP_URL, REVIEWERS
     from .utils import layers_for_geoserver
     from .case_conversions import pascal_to_snake_case
 except ImportError:
-    from config import DATA_DIR, GEOSERVER_URL, APP_URL
+    from config import DATA_DIR, GEOSERVER_URL, APP_URL, REVIEWERS
     from utils import layers_for_geoserver
     from case_conversions import pascal_to_snake_case
 
-
 PARAMETER_MAP = {
+    "flow_rate": {"unit": "m3/s", "name": "Debiet", "dtype": float},
+    "min_upstream_level": {
+        "unit": "m[NAP]",
+        "name": "Streefpeil bovenstrooms",
+        "dtype": float,
+    },
+    "max_downstream_level": {
+        "unit": "m[NAP]",
+        "name": "Streefpeil benedenstrooms",
+        "dtype": float,
+    },
+    "level": {
+        "unit": "m[NAP]",
+        "name": "Waterhoogte",
+        "dtype": float,
+    },
+    "demand": {"unit": "m3/s", "name": "Watervraag", "dtype": float},
+    "return_factor": {"unit": "", "name": "Retourfactor", "dtype": float},
+    "priority": {
+        "unit": "",
+        "name": "Prioriteit",
+        "dtype": int,
+    },
+}
+
+META_MAP = {
+    "meta_waterbeheerder": {"unit": "", "name": "Waterbeheerder", "dtype": str},
+    "meta_code_waterbeheerder": {"unit": "", "name": "Code", "dtype": str},
+    "meta_node_id_waterbeheerder": {
+        "unit": "",
+        "name": "NodeId (waterbeheerder)",
+        "dtype": int,
+    },
+    "meta_beheerder": {"unit": "", "name": "Beheerder", "dtype": str},
+}
+
+
+PARAMETER_MAP_OLD = {
     "drainage": {"unit": "m/s", "name": "Drainage"},
-    "demand": {"unit": "m3/s", "name": "Watervraag"},
-    "flow_rate": {"unit": "m3/s", "name": "Debiet"},
     "infiltration": {"unit": "m/s", "name": "Infiltratie"},
-    "level": {"unit": "m[NAP]", "name": "Waterhoogte"},
     "max_flow_rate": {"unit": "m3/s", "name": "Maximaal debiet"},
-    "max_downstream_level": {"unit": "m[NAP]", "name": "Waterhoogte beneden"},
     "min_flow_rate": {"unit": "m3/s", "name": "Minimaal debiet"},
     "min_level": {"unit": "m[NAP]", "name": "Minimale waterhoogte"},
-    "min_upstream_level": {"unit": "m[NAP]", "name": "Waterhoogte boven"},
     "potential_evaporation": {"unit": "m/s", "name": "Verdamping"},
     "precipitation": {"unit": "m/s", "name": "Neerslag"},
-    "priority": {"unit": "", "name": "Prioriteit"},
-    "return_factor": {"unit": "", "name": "Retourfactor"},
 }
 
 STATIC_DIR = Path(__file__).parents[1] / "static"
@@ -53,13 +84,31 @@ templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 # %%
 # data
+
+
+class Feedback(BaseModel):
+    reviewer: str
+    node_id: int
+    feedback: str
+
+
 ribasim_toml = DATA_DIR.joinpath("lhm", "lhm.toml")
 model = Model.read(ribasim_toml)
 
 node_table = model.node_table().df
 layers_gpkg = layers_for_geoserver(model)
 
+review_gpkg = ribasim_toml.with_name("review.gpkg")
 
+if not review_gpkg.exists():
+    df = gpd.GeoDataFrame(geometry=gpd.GeoSeries(crs=node_table.crs))
+    df["node_id"] = pd.Series(dtype="int32")
+    df["reviewer"] = pd.Series(dtype=str)
+    df["feedback"] = pd.Series(dtype=str)
+    df.to_file(review_gpkg)
+
+
+# %%
 class Layers:
     water_basin_area = gpd.read_file(layers_gpkg, layer="WaterBasinArea").set_index(
         "node_id"
@@ -72,6 +121,9 @@ class Layers:
     storage_basin_area = gpd.read_file(layers_gpkg, layer="StorageBasinArea").set_index(
         "node_id"
     )
+    water_manning_resistance = gpd.read_file(
+        layers_gpkg, layer="WaterManningResistance"
+    ).set_index("node_id")
     water_user_demand = gpd.read_file(layers_gpkg, layer="WaterUserDemand").set_index(
         "node_id"
     )
@@ -79,6 +131,7 @@ class Layers:
     _node_layers = [
         "water_pump",
         "water_tabulated_rating_curve",
+        "water_manning_resistance",
         "water_outlet",
         "water_user_demand",
     ]
@@ -89,6 +142,7 @@ class Layers:
             "water_pump",
             "water_outlet",
             "water_tabulated_rating_curve",
+            "water_manning_resistance",
             "water_basin_area",
             "storage_basin_area",
             "water_user_demand",
@@ -108,6 +162,8 @@ class Layers:
             return "constant.svg"
         elif layer == "water_tabulated_rating_curve":
             return "qh.svg"
+        elif layer == "water_manning_resistance":
+            return "manning_resistance.svg"
         elif layer == "water_user_demand":
             return "gebruiker.svg"
 
@@ -190,10 +246,11 @@ app = FastAPI(
 origins = ["*"]
 
 
-def static_to_dict(df):
+def map_series(series, map_dict=META_MAP):
     return [
-        [PARAMETER_MAP[k]["name"], v, PARAMETER_MAP[k]["unit"]]
-        for k, v in df.dropna().to_dict().items()
+        [map_dict[k]["name"], map_dict[k]["dtype"](v), map_dict[k]["unit"]]
+        for k, v in series.dropna().to_dict().items()
+        if k in map_dict.keys()
     ]
 
 
@@ -268,24 +325,54 @@ async def search(query: str):
         return []
 
 
-@app.get("/info", include_in_schema=False)
-async def info(node_id=int):
-    """
-    - **x**: x-coordinate
-    - **y**: y-coordinate
-    - **tolerance**: tolerance around point for searching objects
-    """
+@app.post("/feedback", include_in_schema=True)
+def post(feedback: Feedback):
+    if feedback.reviewer in REVIEWERS:
+        df = gpd.read_file(review_gpkg, fid_as_index=True)
+        geometry = node_table.at[feedback.node_id, "geometry"]
+        if df.empty:
+            fid = 1
+        else:
+            fid = df.index.max() + 1
+        df.loc[fid] = {
+            "reviewer": feedback.reviewer,
+            "node_id": feedback.node_id,
+            "feedback": feedback.feedback,
+            "geometry": geometry,
+        }
+        df.to_file(review_gpkg)
+        return {"message": "Feedback submitted successfully!"}
+    else:
+        return {"error": "Unauthorized reviewer."}, 403
 
+
+@app.get("/info_header", include_in_schema=False)
+async def info_header(node_id=int):
+    """Return info_header on node_id"""
+    if node_id is not None:
+        node_id = int(node_id)
+        layer = app_layers.get_layer(node_id)
+        node_type = node_table.at[node_id, "node_type"]
+        node_name = node_table.at[node_id, "name"]
+        photo_url = f"{APP_URL}/static/icons/{app_layers.get_icon(layer)}"
+        template = env.get_template("info_header.html")
+
+        html_content = template.render(
+            photo_url=photo_url,
+            node_name=node_name,
+            node_type=node_type,
+            node_id=node_id,
+        )
+        return HTMLResponse(content=html_content, status_code=200)
+    else:
+        return None
+
+
+@app.get("/info_body", include_in_schema=False)
+async def info_body(node_id=int):
     node_id = int(node_id)
     if node_id is not None:
         layer = app_layers.get_layer(node_id)
-
-        kwargs = dict(
-            node_id=node_id,
-            node_type=node_table.at[node_id, "node_type"],
-            node_name=node_table.at[node_id, "name"],
-            photo_url=f"{APP_URL}/static/icons/{app_layers.get_icon(layer)}",
-        )
 
         # basins and rating curves are always graph-types
         if layer in [
@@ -305,12 +392,11 @@ async def info(node_id=int):
             if isinstance(flow_rate, pd.Series):
                 template = env.get_template("info_graph.html")
             else:
-                template = env.get_template("info_constant.html")
-                kwargs["flow_rate"] = flow_rate
+                template = env.get_template("info_table.html")
         else:
-            template = env.get_template("info_constant.html")
+            template = env.get_template("info_table.html")
 
-        html_content = template.render(**kwargs)
+        html_content = template.render()
 
         return HTMLResponse(content=html_content, status_code=200)
     else:
@@ -354,15 +440,19 @@ async def graph_data(node_id: int):
 
 @app.get("/static_data", tags=["Ribasim"])
 async def static_data(node_id: int):
-    node_type = node_table.at[node_id, "node_type"]
-    df = getattr(model, pascal_to_snake_case(node_type)).static.df
-    df = df.set_index("node_id").loc[node_id]
-    if isinstance(df, pd.Series):
-        result = static_to_dict(df)
-        if len(result) > 0:
-            return result
-        else:
-            return None
+    # noe properties
+    node = node_table.loc[node_id]
+    result = map_series(node, map_dict=META_MAP)
+
+    # static properties
+    df = getattr(model, pascal_to_snake_case(node.node_type)).static.df
+    series = df.set_index("node_id").loc[node_id]
+    if isinstance(series, pd.Series):
+        result += map_series(series, map_dict=PARAMETER_MAP)
+
+    # return result if we have any
+    if len(result) > 0:
+        return result
     else:
         return None
 
@@ -415,3 +505,7 @@ async def file(file_path: str, response: Response):
         return Response(content=content, media_type="image/png")
     else:
         raise HTTPException(status_code=404, detail="File not found")
+
+
+# %%
+""

@@ -1,9 +1,22 @@
 <!DOCTYPE html>
 <html>
   <body>
-  <div id="info-container" class="info-container">
-    <span id="info-close-button" onclick="closeInfo()"></span>
-    <div id="info"></div>
-  </div>
+    <div id="info-container" class="info-container">
+      <!-- <span id="info-close-button" onclick="closeInfo()"></span> -->
+      <div id="info">
+        <div id="info-header">
+          <!--Content of info_header.html requested via API-->
+        </div>
+        <div class="info-actions">
+          <button type="button" class="custom-button" title="feedback" id="feedback-button">
+            <img src="static/icons/feedback.svg" alt="feedback" class="custom-icon" />
+          </button>
+          <hr />
+        </div>
+        <div id="info-body">
+          <!--Content of info_graph.html or info_constant.html requested via API-->
+        </div>
+      </div>
+    </div>
   </body>
 </html>

@@ -11,5 +11,8 @@
             "source.fixAll": "explicit"
         }
     },
+    "editor.formatOnSave": true,
+    "prettier.singleQuote": true,
+    "prettier.trailingComma": "all",
     "julia.environmentPath": "d:\\repositories\\Ribasim-NL"
 }
